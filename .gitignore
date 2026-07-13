@@ -1,0 +1,16 @@
+# Ignore Laravel vendor/ and node_modules/ for all subdirectories
+**/vendor/
+**/node_modules/
+**/.env
+**/*.sqlite
+**/*.sqlite-journal
+**/*.sqlite-wal
+
+# Build files
+**/public/build/
+**/public/hot
+**/storage/*.key
+
+# OS files
+.DS_Store
+Thumbs.db

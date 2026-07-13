@@ -1,0 +1,1107 @@
+@extends('layouts.procurement', [
+    'pageTitle' => 'Procurement Landing',
+    'workspaceTitle' => 'Procurement Landing',
+    'workspaceSubtitle' => 'Purchase on the left, alerts on the right, and Create PO in a modal.',
+])
+
+@section('title', 'Order Management')
+@section('subtitle', 'Purchase orders and procurement tracking')
+
+@section('header_right')
+@endsection
+
+@section('content')
+    <style>
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 4fr) minmax(300px, 1fr);
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .page-section {
+            background: #fff;
+            border: 1px solid #dfe5dc;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+            overflow: hidden;
+        }
+
+        /* Both panels always maintain consistent minimum height */
+        #purchase.page-section,
+        #sidenotif.page-section {
+            min-height: 700px;
+            align-self: stretch;
+        }
+
+        /* Sidebar inner body never scrolls */
+        #sidenotif .section-body {
+            overflow: visible !important;
+        }
+
+        .page-section-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            padding: 22px 24px;
+            border-bottom: 1px solid #e8ece7;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #165c32;
+            margin-bottom: 8px;
+        }
+
+        .section-label::before {
+            content: '';
+            width: 28px;
+            height: 3px;
+            border-radius: 999px;
+            background: #1e7d43;
+        }
+
+        .page-section-header h2 {
+            margin: 0 0 6px;
+            font-size: 26px;
+            color: #0f1724;
+            font-weight: 800;
+        }
+
+        .page-section-header p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .section-body {
+            padding: 18px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: #f8faf8;
+            border: 1px solid #e3e8e1;
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 76px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            letter-spacing: .04em;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #14213d;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .tab {
+            border: 1px solid #e3e8e1;
+            background: #f6f7f8;
+            color: #4b5563;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef7f0;
+            color: #1e7d43;
+            border-color: #d5e9d9;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            padding: 0 6px;
+            margin-left: 6px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.75);
+            font-size: 11px;
+        }
+
+        .table-wrap {
+            border: 1px solid #e4e8e2;
+            border-radius: 14px;
+            overflow: auto;
+            background: #fff;
+            max-height: 420px;
+        }
+
+        .table-wrap table {
+            width: auto !important;
+            min-width: 100% !important;
+            border-collapse: collapse;
+            font-size: 14px;
+            table-layout: auto !important;
+        }
+
+        /* Ensure columns have adequate minimum widths to prevent squishing and overlaps */
+        .table-wrap th:nth-child(1), .table-wrap td:nth-child(1) { min-width: 110px; } /* PO ID */
+        .table-wrap th:nth-child(2), .table-wrap td:nth-child(2) { min-width: 100px; } /* Linked PR */
+        .table-wrap th:nth-child(3), .table-wrap td:nth-child(3) { min-width: 180px; } /* Supplier */
+        .table-wrap th:nth-child(4), .table-wrap td:nth-child(4) { min-width: 120px; } /* Date Issued */
+        .table-wrap th:nth-child(5), .table-wrap td:nth-child(5) { min-width: 130px; } /* Expected Delivery */
+        .table-wrap th:nth-child(6), .table-wrap td:nth-child(6) { min-width: 110px; } /* Subtotal */
+        .table-wrap th:nth-child(7), .table-wrap td:nth-child(7) { min-width: 90px; }  /* VAT */
+        .table-wrap th:nth-child(8), .table-wrap td:nth-child(8) { min-width: 110px; } /* Total */
+        .table-wrap th:nth-child(9), .table-wrap td:nth-child(9) { min-width: 150px; } /* Status */
+        .table-wrap th:nth-child(10), .table-wrap td:nth-child(10) { min-width: 140px; } /* Actions */
+
+        .table-wrap thead th {
+            text-align: left;
+            padding: 14px 16px;
+            color: #6b7280;
+            font-size: 12px;
+            background: #f8faf8;
+            border-bottom: 1px solid #e8ece7;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-wrap tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eef1ed;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table-wrap tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-sent { background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; }
+        .badge-received { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .badge-overdue { background: #b91c1c; color: #ffffff; border: 1px solid #b91c1c; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-partial { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .badge-draft { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+        .badge-approved { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-cancelled { background: #fdf2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .po-row-overdue {
+            background-color: #fff8f8 !important;
+        }
+
+        .btn-outline-green {
+            background: #fff;
+            color: #1e7d43;
+            border: 1px solid #1e7d43;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        .btn-outline-green:hover {
+            background: #f4faf6;
+        }
+
+        .btn-outline-red {
+            background: #fff;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        .btn-outline-red:hover {
+            background: #fff5f5;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn,
+        .action-link,
+        .chip-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: 1px solid #d8dfd4;
+            background: #fff;
+            color: #165c32;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 10px 14px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #1e7d43;
+            color: #fff;
+            border-color: #1e7d43;
+            padding: 12px 18px;
+            box-shadow: 0 8px 20px rgba(30,125,67,0.18);
+            font-size: 14px;
+        }
+
+        .btn-soft {
+            background: #f4f5f7;
+            color: #334155;
+            border-color: #e2e8f0;
+        }
+
+        .btn-ghost {
+            background: #eef7f0;
+            color: #165c32;
+            border-color: #d5e9d9;
+        }
+
+        .alerts-card {
+            display: grid;
+            gap: 16px;
+        }
+
+        .mini-card {
+            border: 1px solid #e4e8e2;
+            border-radius: 14px;
+            padding: 18px;
+            background: #fff;
+        }
+
+        .mini-card:target {
+            outline: 2px solid #1e7d43;
+            outline-offset: 2px;
+        }
+
+        .mini-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #2f5d34;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .muted {
+            color: #6b7280;
+        }
+
+        .log-list {
+            display: grid;
+            gap: 12px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .log-item {
+            padding: 12px 14px;
+            border: 1px solid #e4e8e2;
+            border-radius: 12px;
+            background: #fdfefe;
+        }
+
+        .log-item strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #14213d;
+        }
+
+        .overlay-card {
+            width: min(980px, calc(100vw - 48px));
+            max-height: calc(100vh - 48px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 50;
+        }
+
+        .modal-backdrop:target {
+            display: flex;
+        }
+
+        .modal {
+            width: min(980px, calc(100vw - 48px));
+            max-height: calc(100vh - 48px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .modal .drawer-header {
+            flex-shrink: 0;
+        }
+
+        .modal .drawer-body {
+            flex: 1;
+            overflow: auto;
+            min-height: 0;
+        }
+
+        .modal .drawer-footer {
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 1180px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .table-wrap tbody { max-height: 320px; }
+        }
+
+        @media (max-width: 720px) {
+            .section-body,
+            .page-section-header {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <div class="dashboard-layout" id="dashboard-root">
+        <section id="purchase" class="page-section">
+            <div class="page-section-header" style="display: none !important;">
+                <div>
+                    <div class="section-label">Procurement Overview</div>
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                    <!-- Card 1 -->
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                            </div>
+                            <span class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">
+                                <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                +12% vs last month
+                            </span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-3xl font-black text-slate-900 tracking-tight">{{ $stats['total'] }}</div>
+                            <div class="text-sm font-semibold text-slate-500 mt-1">Total Purchase Orders</div>
+                            <div class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase mt-0.5">This Month</div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-5 h-5"></i>
+                            </div>
+                            <span class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
+                                <i data-lucide="clock" class="w-3 h-3"></i>
+                                Draft Status
+                            </span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-3xl font-black text-slate-900 tracking-tight">{{ $stats['draft'] }}</div>
+                            <div class="text-sm font-semibold text-slate-500 mt-1">Pending / Draft</div>
+                            <div class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase mt-0.5">Awaiting action</div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <i data-lucide="send" class="w-5 h-5"></i>
+                            </div>
+                            <span class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">
+                                <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                Active
+                            </span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-3xl font-black text-slate-900 tracking-tight">{{ $stats['sent'] }}</div>
+                            <div class="text-sm font-semibold text-slate-500 mt-1">Active / Sent</div>
+                            <div class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase mt-0.5">Sent to suppliers</div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+                                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                            </div>
+                            <span class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700">
+                                <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                Attention
+                            </span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-3xl font-black text-slate-900 tracking-tight" style="color: #dc2626;">{{ $stats['overdue'] }}</div>
+                            <div class="text-sm font-semibold text-slate-500 mt-1">Overdue Orders</div>
+                            <div class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase mt-0.5">Requires action</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spend & Status Analytics Charts -->
+                <div class="analytics-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin: 24px 0;">
+                    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 18px; padding: 22px; box-shadow: var(--shadow);">
+                        <div class="mini-title" style="margin-bottom:16px; font-weight:800; font-size:13px; color:var(--brand-dark);">Supplier Spend Distribution (₱)</div>
+                        <div style="height: 220px; position: relative;">
+                            <canvas id="spendChart"></canvas>
+                        </div>
+                    </div>
+                    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 18px; padding: 22px; box-shadow: var(--shadow); display: flex; flex-direction: column;">
+                        <div class="mini-title" style="margin-bottom:16px; font-weight:800; font-size:13px; color:var(--brand-dark);">Order Status Allocation</div>
+                        <div style="height: 220px; position: relative; display: flex; justify-content: center; align-items: center; flex:1;">
+                            <canvas id="statusChart" style="max-height: 180px; max-width: 180px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs" role="tablist" aria-label="PO Filters">
+                    <button type="button" class="tab active" data-filter="all">All <span class="chip">{{ $purchaseOrders->count() }}</span></button>
+                    <button type="button" class="tab" data-filter="draft">Draft <span class="chip">{{ $purchaseOrders->where('status','draft')->count() }}</span></button>
+                    <button type="button" class="tab" data-filter="sent">Sent to Supplier <span class="chip">{{ $purchaseOrders->where('status','sent')->count() }}</span></button>
+                    <button type="button" class="tab" data-filter="received">Fully Received <span class="chip">{{ $purchaseOrders->where('status','received')->count() }}</span></button>
+                </div>
+
+                <!-- TABLE: ALL -->
+                <div class="table-container" id="tab-all">
+                    <div class="table-wrap">
+                        <table class="unified-table" id="table-data-all">
+                            <thead>
+                                <tr>
+                                    <th>PO ID</th>
+                                    <th>Linked PR</th>
+                                    <th>Supplier</th>
+                                    <th>Date Issued</th>
+                                    <th>Expected Delivery</th>
+                                    <th>Subtotal (₱)</th>
+                                    <th>VAT (₱)</th>
+                                    <th>Total (₱)</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($purchaseOrders as $po)
+                                    @php
+                                        $subtotal = $po->total / 1.12;
+                                        $vat = $subtotal * 0.12;
+                                        $isOverdue = $po->status !== 'received' && $po->expected_delivery && $po->expected_delivery->isPast();
+                                    @endphp
+                                    <tr class="po-row {{ $isOverdue ? 'po-row-overdue' : '' }}" style="transition: all 0.2s ease;">
+                                        <td style="font-weight: 700; color: #165c32;">{{ $po->po_number }}</td>
+                                        <td>{{ $po->requisition->code ?? '—' }}</td>
+                                        <td>{{ $po->supplier->name ?? '—' }}</td>
+                                        <td>{{ optional($po->issued_at)->format('M d, Y') ?? optional($po->created_at)->format('M d, Y') }}</td>
+                                        <td style="{{ $isOverdue ? 'color: #dc2626; font-weight: 700;' : '' }}">
+                                            {{ optional($po->expected_delivery)->format('M d, Y') ?? '—' }}
+                                        </td>
+                                        <td>{{ number_format($subtotal, 2) }}</td>
+                                        <td>{{ number_format($vat, 2) }}</td>
+                                        <td style="font-weight: 700;">{{ number_format($po->total, 2) }}</td>
+                                        <td>
+                                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                                @if($po->status === 'sent')
+                                                    <span class="badge badge-sent"><i data-lucide="send" class="w-3.5 h-3.5"></i> Sent to Supplier</span>
+                                                @elseif($po->status === 'received')
+                                                    <span class="badge badge-received"><i data-lucide="check" class="w-3.5 h-3.5"></i> Fully Received</span>
+                                                @elseif($po->status === 'draft')
+                                                    <span class="badge badge-draft"><i data-lucide="clock" class="w-3.5 h-3.5"></i> Draft</span>
+                                                @elseif($po->status === 'approved')
+                                                    <span class="badge badge-approved"><i data-lucide="thumbs-up" class="w-3.5 h-3.5"></i> Approved</span>
+                                                @elseif($po->status === 'partial')
+                                                    <span class="badge badge-partial"><i data-lucide="package" class="w-3.5 h-3.5"></i> Partially Received</span>
+                                                @elseif($po->status === 'cancelled')
+                                                    <span class="badge badge-cancelled"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Cancelled</span>
+                                                @else
+                                                    <span class="badge badge-draft">{{ ucfirst($po->status) }}</span>
+                                                @endif
+
+                                                @if($isOverdue)
+                                                    <span class="badge badge-overdue"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Overdue</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="action-row">
+                                                <button type="button" class="btn-xs btn-soft" onclick="exportTableToCSV('table-data-all', '{{ $po->po_number }}.csv')"><i data-lucide="download" class="w-3.5 h-3.5"></i> CSV</button>
+                                                @if($po->status === 'draft')
+                                                    <a class="btn-xs btn-outline-green" href="{{ route('procurement.create') }}?edit={{ $po->id }}"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit</a>
+                                                    <form method="POST" action="{{ route('purchase_orders.status', $po) }}" style="display:inline">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="cancelled" />
+                                                        <button type="submit" class="btn-xs btn-outline-red"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Cancel</button>
+                                                    </form>
+                                                @elseif($po->status === 'sent')
+                                                    <form method="POST" action="{{ route('purchase_orders.status', $po) }}" style="display:inline">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="received" />
+                                                        <button type="submit" class="btn-xs btn-outline-green"><i data-lucide="check" class="w-3.5 h-3.5"></i> Receive</button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="10" style="text-align: center; padding: 40px; color: var(--muted);">
+                                            No purchase orders found.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 13px; color: #6b7280; display: flex; justify-content: space-between;">
+                        <span>Showing {{ $purchaseOrders->count() }} purchase orders</span>
+                        @if($stats['overdue'] > 0)
+                            <span style="color: #dc2626; font-weight: 700;">⚠️ {{ $stats['overdue'] }} overdue orders — immediate action required</span>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- TABLE: DRAFT -->
+                <div class="table-container" id="tab-draft" style="display:none">
+                    <div class="table-wrap">
+                        <table class="unified-table" id="table-data-draft">
+                            <thead>
+                                <tr>
+                                    <th>PO ID</th>
+                                    <th>Linked PR</th>
+                                    <th>Supplier</th>
+                                    <th>Date Issued</th>
+                                    <th>Expected Delivery</th>
+                                    <th>Subtotal (₱)</th>
+                                    <th>VAT (₱)</th>
+                                    <th>Total (₱)</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($purchaseOrders->where('status', 'draft') as $po)
+                                    @php
+                                        $subtotal = $po->total / 1.12;
+                                        $vat = $subtotal * 0.12;
+                                        $isOverdue = $po->expected_delivery && $po->expected_delivery->isPast();
+                                    @endphp
+                                    <tr class="po-row {{ $isOverdue ? 'po-row-overdue' : '' }}" style="transition: all 0.2s ease;">
+                                        <td style="font-weight: 700; color: #165c32;">{{ $po->po_number }}</td>
+                                        <td>{{ $po->requisition->code ?? '—' }}</td>
+                                        <td>{{ $po->supplier->name ?? '—' }}</td>
+                                        <td>{{ optional($po->issued_at)->format('M d, Y') ?? optional($po->created_at)->format('M d, Y') }}</td>
+                                        <td style="{{ $isOverdue ? 'color: #dc2626; font-weight: 700;' : '' }}">
+                                            {{ optional($po->expected_delivery)->format('M d, Y') ?? '—' }}
+                                        </td>
+                                        <td>{{ number_format($subtotal, 2) }}</td>
+                                        <td>{{ number_format($vat, 2) }}</td>
+                                        <td style="font-weight: 700;">{{ number_format($po->total, 2) }}</td>
+                                        <td>
+                                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                                <span class="badge badge-draft"><i data-lucide="clock" class="w-3.5 h-3.5"></i> Draft</span>
+                                                @if($isOverdue)
+                                                    <span class="badge badge-overdue"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Overdue</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="action-row">
+                                                <button type="button" class="btn-xs btn-soft" onclick="exportTableToCSV('table-data-draft', '{{ $po->po_number }}.csv')"><i data-lucide="download" class="w-3.5 h-3.5"></i> CSV</button>
+                                                <a class="btn-xs btn-outline-green" href="{{ route('procurement.create') }}?edit={{ $po->id }}"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit</a>
+                                                <form method="POST" action="{{ route('purchase_orders.status', $po) }}" style="display:inline">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="cancelled" />
+                                                    <button type="submit" class="btn-xs btn-outline-red"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Cancel</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="10" style="text-align: center; padding: 40px; color: var(--muted);">
+                                            No draft purchase orders found.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 13px; color: #6b7280; display: flex; justify-content: space-between;">
+                        <span>Showing {{ $purchaseOrders->where('status', 'draft')->count() }} purchase order with status "Draft"</span>
+                        @if($stats['overdue'] > 0)
+                            <span style="color: #dc2626; font-weight: 700;">⚠️ {{ $stats['overdue'] }} overdue orders — immediate action required</span>
+                        @endif
+                    </div>
+                </div>
+
+
+
+                <!-- TABLE: SENT TO SUPPLIER -->
+                <div class="table-container" id="tab-sent" style="display:none">
+                    <div class="table-wrap">
+                        <table class="unified-table" id="table-data-sent">
+                            <thead>
+                                <tr>
+                                    <th>PO ID</th>
+                                    <th>Linked PR</th>
+                                    <th>Supplier</th>
+                                    <th>Date Issued</th>
+                                    <th>Expected Delivery</th>
+                                    <th>Subtotal (₱)</th>
+                                    <th>VAT (₱)</th>
+                                    <th>Total (₱)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($purchaseOrders->where('status', 'sent') as $po)
+                                    @php
+                                        $subtotal = $po->total / 1.12;
+                                        $vat = $subtotal * 0.12;
+                                        $isOverdue = $po->expected_delivery && $po->expected_delivery->isPast();
+                                    @endphp
+                                    <tr class="po-row {{ $isOverdue ? 'po-row-overdue' : '' }}" style="transition: all 0.2s ease;">
+                                        <td style="font-weight: 700; color: #165c32;">{{ $po->po_number }}</td>
+                                        <td>{{ $po->requisition->code ?? '—' }}</td>
+                                        <td>{{ $po->supplier->name ?? '—' }}</td>
+                                        <td>{{ optional($po->issued_at)->format('M d, Y') ?? optional($po->created_at)->format('M d, Y') }}</td>
+                                        <td style="{{ $isOverdue ? 'color: #dc2626; font-weight: 700;' : '' }}">
+                                            {{ optional($po->expected_delivery)->format('M d, Y') ?? '—' }}
+                                        </td>
+                                        <td>{{ number_format($subtotal, 2) }}</td>
+                                        <td>{{ number_format($vat, 2) }}</td>
+                                        <td style="font-weight: 700;">{{ number_format($po->total, 2) }}</td>
+                                        <td>
+                                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                                <span class="badge badge-sent"><i data-lucide="send" class="w-3.5 h-3.5"></i> Sent to Supplier</span>
+                                                @if($isOverdue)
+                                                    <span class="badge badge-overdue"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Overdue</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--muted);">
+                                            No purchase orders sent to suppliers.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 13px; color: #6b7280; display: flex; justify-content: space-between;">
+                        <span>Showing {{ $purchaseOrders->where('status', 'sent')->count() }} purchase order with status "Sent to Supplier"</span>
+                        @if($stats['overdue'] > 0)
+                            <span style="color: #dc2626; font-weight: 700;">⚠️ {{ $stats['overdue'] }} overdue orders — immediate action required</span>
+                        @endif
+                    </div>
+                </div>
+
+
+
+                <!-- TABLE: FULLY RECEIVED -->
+                <div class="table-container" id="tab-received" style="display:none">
+                    <div class="table-wrap">
+                        <table class="unified-table" id="table-data-received">
+                            <thead>
+                                <tr>
+                                    <th>PO ID</th>
+                                    <th>Linked PR</th>
+                                    <th>Supplier</th>
+                                    <th>Date Issued</th>
+                                    <th>Expected Delivery</th>
+                                    <th>Subtotal (₱)</th>
+                                    <th>VAT (₱)</th>
+                                    <th>Total (₱)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($purchaseOrders->where('status', 'received') as $po)
+                                    @php
+                                        $subtotal = $po->total / 1.12;
+                                        $vat = $subtotal * 0.12;
+                                    @endphp
+                                    <tr class="po-row" style="transition: all 0.2s ease;">
+                                        <td style="font-weight: 700; color: #165c32;">{{ $po->po_number }}</td>
+                                        <td>{{ $po->requisition->code ?? '—' }}</td>
+                                        <td>{{ $po->supplier->name ?? '—' }}</td>
+                                        <td>{{ optional($po->issued_at)->format('M d, Y') ?? optional($po->created_at)->format('M d, Y') }}</td>
+                                        <td>{{ optional($po->expected_delivery)->format('M d, Y') ?? '—' }}</td>
+                                        <td>{{ number_format($subtotal, 2) }}</td>
+                                        <td>{{ number_format($vat, 2) }}</td>
+                                        <td style="font-weight: 700;">{{ number_format($po->total, 2) }}</td>
+                                        <td>
+                                            <span class="badge badge-received"><i data-lucide="check" class="w-3.5 h-3.5"></i> Fully Received</span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--muted);">
+                                            No fully received purchase orders.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 13px; color: #6b7280; display: flex; justify-content: space-between;">
+                        <span>Showing {{ $purchaseOrders->where('status', 'received')->count() }} purchase order with status "Fully Received"</span>
+                        @if($stats['overdue'] > 0)
+                            <span style="color: #dc2626; font-weight: 700;">⚠️ {{ $stats['overdue'] }} overdue orders — immediate action required</span>
+                        @endif
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+
+        <aside id="sidenotif" class="page-section">
+            <div class="page-section-header">
+                <div>
+                    <div class="section-label">Workflow</div>
+                    <h2>Review &amp; Logs</h2>
+                    <p>Access approvals, matched invoices, and activity logs.</p>
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="sidebar-nav" style="display:grid; gap:16px;">
+                    <div class="tier-primary" style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="tab side-tab active" data-section="notifications" style="padding: 8px 12px; font-size:12px;">Alerts</button>
+                        <button type="button" class="tab side-tab" data-section="match-invoice" style="padding: 8px 12px; font-size:12px;">Match Invoice</button>
+                        <button type="button" class="tab side-tab" data-section="logs" style="padding: 8px 12px; font-size:12px;">Activity</button>
+                    </div>
+
+                    <div class="tier-secondary">
+                        <!-- Notifications/Alerts Section -->
+                        <div class="mini-card side-section" data-section="notifications">
+                            <div class="mini-title">Delivery Alerts</div>
+                            <div class="log-list">
+                                @php $alertCount = 0; @endphp
+                                @foreach($purchaseOrders as $po)
+                                    @if($po->status !== 'received' && $po->expected_delivery && $po->expected_delivery->isPast())
+                                        @php $alertCount++; @endphp
+                                        <div class="log-item" style="border-left: 3px solid #dc2626; background: #fffdfd;">
+                                            <strong style="color: #b91c1c;">⚠️ {{ $po->po_number }} Overdue</strong>
+                                            <div class="muted" style="font-size:12px;">{{ $po->supplier->name ?? '—' }}</div>
+                                            <div style="font-size:11px; margin-top:4px;">Expected: {{ $po->expected_delivery->format('M d, Y') }}</div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                                @if($alertCount === 0)
+                                    <div class="muted" style="text-align: center; padding: 20px; font-size:13px;">No pending delivery alerts.</div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Match Invoice Form Section -->
+                        <div class="mini-card side-section" data-section="match-invoice" style="display:none">
+                            <div class="mini-title">Match Invoice to PO</div>
+                            <form method="POST" action="{{ route('purchase_orders.match_invoice') }}">
+                                @csrf
+                                <div class="form-group">
+                                    <label style="font-size:12px; font-weight:700;">Select Purchase Order *</label>
+                                    <select name="po_number" required style="width:100%; border:1px solid #d6ddd3; border-radius:10px; padding:8px 10px; font-size:13px;">
+                                        <option value="">Choose Active PO...</option>
+                                        @foreach($purchaseOrders as $po)
+                                            @if($po->status === 'sent')
+                                                <option value="{{ $po->po_number }}">{{ $po->po_number }} — {{ $po->supplier->name }} (₱{{ number_format($po->total, 2) }})</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-size:12px; font-weight:700;">Invoice Reference *</label>
+                                    <input type="text" name="invoice_number" required placeholder="e.g. INV-SUP-001" style="width:100%; border:1px solid #d6ddd3; border-radius:10px; padding:8px 10px; font-size:13px;" />
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-size:12px; font-weight:700;">Invoice Amount (₱) *</label>
+                                    <input type="number" step="0.01" name="amount" required placeholder="0.00" style="width:100%; border:1px solid #d6ddd3; border-radius:10px; padding:8px 10px; font-size:13px;" />
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width:100%; padding:10px; font-size:13px; font-weight:700;">
+                                    Match Invoice
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Logs Section -->
+                        <div class="mini-card side-section" data-section="logs" style="display:none">
+                            <div class="mini-title">Recent Activities</div>
+                            <div class="log-list">
+                                @foreach($purchaseOrders->where('status', '!=', 'draft')->take(3) as $po)
+                                    <div class="log-item">
+                                        <strong>PO Transmitted</strong>
+                                        <div class="muted" style="font-size:12px;">{{ $po->po_number }} issued to {{ $po->supplier->name }}</div>
+                                        <div style="font-size:10px; margin-top:4px; color:var(--muted);">{{ $po->updated_at->diffForHumans() }}</div>
+                                    </div>
+                                @endforeach
+                                @foreach($invoices->take(2) as $inv)
+                                    <div class="log-item" style="border-left: 3px solid #2354c9;">
+                                        <strong>Invoice Matched</strong>
+                                        <div class="muted" style="font-size:12px;">{{ $inv->invoice_number }} to {{ $inv->purchaseOrder->po_number ?? '—' }}</div>
+                                        <div style="font-size:10px; margin-top:4px; color:var(--muted);">{{ $inv->received_at->diffForHumans() }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+@endsection
+
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            // --- POPULAR SIDEBAR SECTIONS SWITCHER ---
+            const tabs = document.querySelectorAll('#sidenotif .side-tab');
+            const sections = document.querySelectorAll('#sidenotif .side-section');
+            if(tabs.length && sections.length) {
+                function showSection(name){
+                    sections.forEach(s=> s.style.display = (s.dataset.section === name) ? '' : 'none');
+                    tabs.forEach(t=> t.classList.toggle('active', t.dataset.section === name));
+                }
+                tabs.forEach(t=> t.addEventListener('click', ()=> showSection(t.dataset.section)));
+                const active = Array.from(tabs).find(t=> t.classList.contains('active')) || tabs[0];
+                if(active) showSection(active.dataset.section);
+            }
+
+            // --- CLIENT-SIDE TABLE STATUS FILTERING WITH SEPARATE TABLES ---
+            const tabButtons = document.querySelectorAll('.tabs .tab');
+            const tableContainers = document.querySelectorAll('.table-container');
+
+            window.exportTableToCSV = function(tableId, filename) {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+
+                let csv = [];
+                const rows = table.querySelectorAll('tr');
+
+                for (let i = 0; i < rows.length; i++) {
+                    const row = [];
+                    const cols = rows[i].querySelectorAll('td, th');
+
+                    for (let j = 0; j < cols.length; j++) {
+                        // Skip actions column
+                        if (cols[j].textContent.trim().toLowerCase() === 'actions' || 
+                            cols[j].querySelector('.action-row')) {
+                            continue;
+                        }
+
+                        let text = cols[j].textContent.trim()
+                            .replace(/"/g, '""') // Escape double quotes
+                            .replace(/\n/g, ' ') // Remove newlines
+                            .replace(/\s+/g, ' '); // Clean spaces
+
+                        row.push(`"${text}"`);
+                    }
+
+                    if (row.length > 0) {
+                        csv.push(row.join(','));
+                    }
+                }
+
+                const csvContent = csv.join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            if(tabButtons.length && tableContainers.length) {
+                function switchTab(filter) {
+                    tableContainers.forEach(container => {
+                        if (container.id === `tab-${filter}`) {
+                            container.style.display = 'block';
+                        } else {
+                            container.style.display = 'none';
+                        }
+                    });
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.filter === filter);
+                    });
+                }
+
+                tabButtons.forEach(btn => btn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    const filter = this.dataset.filter || 'all';
+                    switchTab(filter);
+                }));
+
+                const activeTab = document.querySelector('.tabs .tab.active');
+                if (activeTab) {
+                    switchTab(activeTab.dataset.filter || 'all');
+                }
+            }
+
+
+
+            // --- ANALYTICS CHARTS INITIALIZATION ---
+            const spendData = @json($spendData);
+            const spendLabels = spendData.map(d => d.supplier);
+            const spendTotals = spendData.map(d => d.total);
+
+            // Spend Chart (Bar Chart)
+            const ctxSpend = document.getElementById('spendChart').getContext('2d');
+            if (window.purchaseSpendChart) {
+                window.purchaseSpendChart.destroy();
+            }
+            window.purchaseSpendChart = new Chart(ctxSpend, {
+                type: 'bar',
+                data: {
+                    labels: spendLabels,
+                    datasets: [{
+                        label: 'Total Spend (₱)',
+                        data: spendTotals,
+                        backgroundColor: 'rgba(30, 125, 67, 0.75)',
+                        borderColor: '#1e7d43',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(232, 238, 230, 0.4)' },
+                            ticks: { font: { family: 'Outfit', size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Outfit', size: 11 } }
+                        }
+                    }
+                }
+            });
+
+            // Status Chart (Doughnut Chart)
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            if (window.purchaseStatusChart) {
+                window.purchaseStatusChart.destroy();
+            }
+            window.purchaseStatusChart = new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Draft', 'Sent', 'Received'],
+                    datasets: [{
+                        data: [
+                            {{ $purchaseOrders->where('status', 'draft')->count() }},
+                            {{ $purchaseOrders->where('status', 'sent')->count() }},
+                            {{ $purchaseOrders->where('status', 'received')->count() }}
+                        ],
+                        backgroundColor: [
+                            'rgba(107, 114, 128, 0.75)', // Draft
+                            'rgba(35, 84, 201, 0.75)',  // Sent
+                            'rgba(30, 125, 67, 0.75)'   // Received
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { font: { family: 'Outfit', size: 12 } }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        });
+    </script>
+@endsection
