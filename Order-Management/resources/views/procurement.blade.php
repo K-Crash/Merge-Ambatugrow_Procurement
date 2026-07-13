@@ -167,9 +167,12 @@
         .table-wrap {
             border: 1px solid #e4e8e2;
             border-radius: 14px;
-            overflow: auto;
+            overflow-x: auto;
+            overflow-y: auto;
             background: #fff;
             max-height: 420px;
+            width: 100%;
+            max-width: 100%;
         }
 
         .table-wrap table {
