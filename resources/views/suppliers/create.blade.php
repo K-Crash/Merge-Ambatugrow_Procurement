@@ -1,15 +1,9 @@
-@extends('layouts.erp')
+@extends('layouts.master')
 
 @section('title', 'Add New Supplier')
+@section('subtitle', 'Register a new vendor partner in the directory')
 
 @section('content')
-    
-
-    {{-- Page Header --}}
-    <div class="mb-7">
-        <h1 style="font-size:26px; font-weight:700; color:#111827;">Add new supplier</h1>
-        <p class="text-[13px] text-gray-500 mt-1">Fill in the details to register a new supplier.</p>
-    </div>
 
     <form method="POST" action="{{ route('suppliers.store') }}" class="flex flex-col gap-5">
         @csrf

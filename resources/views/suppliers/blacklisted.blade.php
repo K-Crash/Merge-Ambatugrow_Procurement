@@ -1,16 +1,11 @@
-@extends('layouts.erp')
+@extends('layouts.master')
 
 @section('title', 'Blacklisted Suppliers')
+@section('subtitle', 'Suppliers restricted from operations due to non-compliance or violations')
 
 @section('content')
 
 <div class="max-w-5xl mx-auto">
-
-    {{-- Page Header --}}
-    <div class="mb-6">
-        <h1 style="font-size:26px; font-weight:700; color:#111827; letter-spacing:-0.02em;">Blacklisted Suppliers</h1>
-        <p class="page-subtitle">Suppliers restricted from operations due to non-compliance or violations</p>
-    </div>
 
     {{-- KPI Cards --}}
     <div class="grid grid-cols-4 gap-4 mb-6">

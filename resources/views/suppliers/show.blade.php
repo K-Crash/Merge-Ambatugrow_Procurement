@@ -1,6 +1,7 @@
-@extends('layouts.erp')
+@extends('layouts.master')
 
-@section('title', $supplier['name'])
+@section('title', 'Supplier Profile')
+@section('subtitle', 'Overview and verification metrics')
 
 @section('content')
 

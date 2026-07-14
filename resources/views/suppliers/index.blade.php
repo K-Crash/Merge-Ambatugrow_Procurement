@@ -1,13 +1,13 @@
-@extends('layouts.erp')
+@extends('layouts.master')
 
-@section('title', 'Suppliers')
+@section('title', 'Suppliers List')
+@section('subtitle', 'All registered agricultural suppliers')
 
 @section('content')
-    
 
     {{-- Page Header --}}
     <div class="flex items-center justify-between mb-6">
-        <h1 style="font-size:26px; font-weight:700; color:#111827; letter-spacing:-0.02em;">Suppliers</h1>
+        <div></div>
         <div class="flex items-center gap-3">
             {{-- Search --}}
             <form method="GET" action="{{ route('suppliers.index') }}">
