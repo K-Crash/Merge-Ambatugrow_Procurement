@@ -330,18 +330,44 @@
             border-color: #1e293b !important;
         }
         
-        /* High contrast typography */
-        .dark .text-slate-750, .dark .text-slate-800, .dark .text-slate-805, .dark .text-slate-900, .dark .text-gray-800, .dark .text-gray-900 {
-            color: #f8fafc !important; /* white */
+        /* High Contrast Typography Adjustments (Light Mode) */
+        body {
+            color: #0f172a !important; /* solid charcoal */
         }
-        .dark .text-slate-700, .dark .text-slate-600, .dark .text-gray-700, .dark .text-gray-600 {
-            color: #cbd5e1 !important; /* off-white */
+        .text-slate-500, .text-gray-500, .text-slate-400, .text-gray-400 {
+            color: #4b5563 !important; /* rich gray - readable on white */
         }
-        .dark .text-slate-500, .dark .text-gray-500 {
-            color: #94a3b8 !important; /* slate gray */
+        .text-slate-600, .text-gray-600 {
+            color: #374151 !important; /* dark slate gray */
         }
+        .text-slate-700, .text-gray-700, .text-slate-800, .text-gray-800 {
+            color: #1f2937 !important; /* deep near-black */
+        }
+
+        /* High Contrast Typography Mappings (Dark Mode) */
+        .dark .text-slate-750, .dark .text-slate-805, .dark .text-slate-800, .dark .text-slate-900, .dark .text-gray-800, .dark .text-gray-900,
+        .dark [class*="text-slate-8"], .dark [class*="text-slate-9"],
+        .dark [class*="text-gray-8"], .dark [class*="text-gray-9"],
+        .dark [class*="text-neutral-8"], .dark [class*="text-neutral-9"] {
+            color: #ffffff !important; /* maximum brightness for headings/bold labels */
+        }
+        
+        .dark .text-slate-700, .dark .text-slate-600, .dark .text-gray-700, .dark .text-gray-600,
+        .dark [class*="text-slate-6"], .dark [class*="text-slate-7"],
+        .dark [class*="text-gray-6"], .dark [class*="text-gray-7"],
+        .dark [class*="text-neutral-6"], .dark [class*="text-neutral-7"] {
+            color: #f1f5f9 !important; /* very clear off-white for regular body text */
+        }
+        
+        .dark .text-slate-500, .dark .text-gray-500,
+        .dark [class*="text-slate-4"], .dark [class*="text-slate-5"],
+        .dark [class*="text-gray-4"], .dark [class*="text-gray-5"],
+        .dark [class*="text-neutral-4"], .dark [class*="text-neutral-5"] {
+            color: #cbd5e1 !important; /* clear light gray for secondary labels/descriptions */
+        }
+
         .dark .text-slate-400, .dark .text-gray-400 {
-            color: #64748b !important; /* dark slate gray */
+            color: #94a3b8 !important; /* muted gray - still readable on void background */
         }
         
         /* Dynamic Accent Elements */
