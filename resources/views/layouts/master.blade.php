@@ -322,8 +322,8 @@
             background-color: #111827 !important; /* solid card dark */
             color: #f8fafc !important;
         }
-        .dark .card, .dark .bg-\[\#e8ece6\], .dark .bg-\[\#f4f7f3\], .dark .submenu-bar, .dark .sidebar-aside, .dark aside {
-            background-color: #0f172a !important; /* dark slate bar */
+        .dark .card {
+            background-color: #111827 !important;
             border-color: #1e293b !important;
         }
         .dark .border-slate-200, .dark .border-slate-100, .dark .border-slate-200\/60, .dark .border-slate-200\/50, .dark .border-slate-350, .dark .border-slate-300 {
@@ -344,41 +344,66 @@
             color: #1f2937 !important; /* deep near-black */
         }
 
-        /* High Contrast Typography Mappings (Dark Mode) */
-        .dark .text-slate-750, .dark .text-slate-805, .dark .text-slate-800, .dark .text-slate-900, .dark .text-gray-800, .dark .text-gray-900,
-        .dark [class*="text-slate-8"], .dark [class*="text-slate-9"],
-        .dark [class*="text-gray-8"], .dark [class*="text-gray-9"],
-        .dark [class*="text-neutral-8"], .dark [class*="text-neutral-9"] {
+        /* High Contrast Typography Mappings (Dark Mode - Scoped outside sidebar) */
+        .dark :not(aside):not(aside *) .text-slate-750, 
+        .dark :not(aside):not(aside *) .text-slate-805, 
+        .dark :not(aside):not(aside *) .text-slate-800, 
+        .dark :not(aside):not(aside *) .text-slate-900, 
+        .dark :not(aside):not(aside *) .text-gray-800, 
+        .dark :not(aside):not(aside *) .text-gray-900,
+        .dark :not(aside):not(aside *) [class*="text-slate-8"], 
+        .dark :not(aside):not(aside *) [class*="text-slate-9"],
+        .dark :not(aside):not(aside *) [class*="text-gray-8"], 
+        .dark :not(aside):not(aside *) [class*="text-gray-9"],
+        .dark :not(aside):not(aside *) [class*="text-neutral-8"], 
+        .dark :not(aside):not(aside *) [class*="text-neutral-9"] {
             color: #ffffff !important; /* maximum brightness for headings/bold labels */
         }
         
-        .dark .text-slate-700, .dark .text-slate-600, .dark .text-gray-700, .dark .text-gray-600,
-        .dark [class*="text-slate-6"], .dark [class*="text-slate-7"],
-        .dark [class*="text-gray-6"], .dark [class*="text-gray-7"],
-        .dark [class*="text-neutral-6"], .dark [class*="text-neutral-7"] {
+        .dark :not(aside):not(aside *) .text-slate-700, 
+        .dark :not(aside):not(aside *) .text-slate-600, 
+        .dark :not(aside):not(aside *) .text-gray-700, 
+        .dark :not(aside):not(aside *) .text-gray-600,
+        .dark :not(aside):not(aside *) [class*="text-slate-6"], 
+        .dark :not(aside):not(aside *) [class*="text-slate-7"],
+        .dark :not(aside):not(aside *) [class*="text-gray-6"], 
+        .dark :not(aside):not(aside *) [class*="text-gray-7"],
+        .dark :not(aside):not(aside *) [class*="text-neutral-6"], 
+        .dark :not(aside):not(aside *) [class*="text-neutral-7"] {
             color: #f1f5f9 !important; /* very clear off-white for regular body text */
         }
         
-        .dark .text-slate-500, .dark .text-gray-500,
-        .dark [class*="text-slate-4"], .dark [class*="text-slate-5"],
-        .dark [class*="text-gray-4"], .dark [class*="text-gray-5"],
-        .dark [class*="text-neutral-4"], .dark [class*="text-neutral-5"] {
+        .dark :not(aside):not(aside *) .text-slate-500, 
+        .dark :not(aside):not(aside *) .text-gray-500,
+        .dark :not(aside):not(aside *) [class*="text-slate-4"], 
+        .dark :not(aside):not(aside *) [class*="text-slate-5"],
+        .dark :not(aside):not(aside *) [class*="text-gray-4"], 
+        .dark :not(aside):not(aside *) [class*="text-gray-5"],
+        .dark :not(aside):not(aside *) [class*="text-neutral-4"], 
+        .dark :not(aside):not(aside *) [class*="text-neutral-5"] {
             color: #cbd5e1 !important; /* clear light gray for secondary labels/descriptions */
         }
 
-        .dark .text-slate-400, .dark .text-gray-400 {
+        .dark :not(aside):not(aside *) .text-slate-400, 
+        .dark :not(aside):not(aside *) .text-gray-400 {
             color: #94a3b8 !important; /* muted gray - still readable on void background */
         }
         
-        /* Dynamic Accent Elements */
-        .dark .text-\[\#235c2b\], .dark .text-green-800, .dark .text-[#1f5c3d] {
+        /* Dynamic Accent Elements (Scoped outside sidebar) */
+        .dark :not(aside):not(aside *) .text-\[\#235c2b\], 
+        .dark :not(aside):not(aside *) .text-green-800, 
+        .dark :not(aside):not(aside *) .text-[#1f5c3d] {
             color: #34d399 !important; /* mint green for high contrast */
         }
-        .dark .bg-\[\#235c2b\], .dark .bg-emerald-600, .dark .bg-emerald-700 {
+        .dark :not(aside):not(aside *) .bg-\[\#235c2b\], 
+        .dark :not(aside):not(aside *) .bg-emerald-600, 
+        .dark :not(aside):not(aside *) .bg-emerald-700 {
             background-color: #059669 !important; /* high visibility green button */
             color: #ffffff !important;
         }
-        .dark .bg-\[\#235c2b\]:hover, .dark .bg-emerald-600:hover, .dark .bg-emerald-700:hover {
+        .dark :not(aside):not(aside *) .bg-\[\#235c2b\]:hover, 
+        .dark :not(aside):not(aside *) .bg-emerald-600:hover, 
+        .dark :not(aside):not(aside *) .bg-emerald-700:hover {
             background-color: #10b981 !important;
         }
         
