@@ -310,64 +310,76 @@
             display: flex !important;
         }
 
-        /* Real Working Dark Mode styling sheet */
+        /* Real Working Dark Mode styling sheet with high contrast */
         .dark body {
-            background-color: #0f172a !important; /* bg-slate-900 */
-            color: #f1f5f9 !important; /* text-slate-100 */
+            background-color: #0b0f19 !important; /* deep slate dark */
+            color: #f8fafc !important; /* slate 50 */
         }
-        .dark .bg-slate-100 {
-            background-color: #0f172a !important;
+        .dark .bg-slate-100, .dark .bg-\[\#f9fafb\], .dark .bg-\[\#F9FAFB\], .dark main.flex-grow {
+            background-color: #0b0f19 !important;
         }
-        .dark .bg-white {
-            background-color: #1e293b !important; /* bg-slate-800 */
-            color: #f1f5f9 !important;
+        .dark .bg-white, .dark .bg-slate-50, .dark .bg-slate-50\/50, .dark .bg-slate-100\/50 {
+            background-color: #161e2e !important; /* card background */
+            color: #f8fafc !important;
         }
-        .dark .card, .dark .bg-[#e8ece6], .dark .bg-[#f4f7f3] {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
+        .dark .card, .dark .bg-\[\#e8ece6\], .dark .bg-\[\#f4f7f3\], .dark .submenu-bar, .dark .sidebar-aside {
+            background-color: #111827 !important; /* side nav and card wrapper */
+            border-color: #1f2937 !important;
         }
-        .dark .border-slate-200, .dark .border-slate-200\/60, .dark .border-slate-200\/50, .dark .border-slate-350, .dark .border-slate-300 {
-            border-color: #334155 !important;
+        .dark .border-slate-200, .dark .border-slate-100, .dark .border-slate-200\/60, .dark .border-slate-200\/50, .dark .border-slate-350, .dark .border-slate-300 {
+            border-color: #374151 !important;
         }
-        .dark .text-slate-700, .dark .text-slate-805, .dark .text-slate-800, .dark .text-slate-900, .dark .text-slate-750 {
-            color: #cbd5e1 !important; /* text-slate-300 */
+        .dark .text-slate-700, .dark .text-slate-805, .dark .text-slate-800, .dark .text-slate-900, .dark .text-slate-750, .dark .text-gray-900, .dark .text-gray-800 {
+            color: #f1f5f9 !important; /* high contrast text */
         }
-        .dark .text-slate-500, .dark .text-slate-600 {
-            color: #94a3b8 !important; /* text-slate-400 */
+        .dark .text-slate-500, .dark .text-slate-600, .dark .text-gray-600, .dark .text-gray-500 {
+            color: #cbd5e1 !important; /* standard body text */
         }
-        .dark .text-slate-400 {
-            color: #64748b !important; /* text-slate-500 */
+        .dark .text-slate-400, .dark .text-gray-400 {
+            color: #94a3b8 !important; /* muted labels */
         }
-        .dark .text-slate-900 {
-            color: #f8fafc !important; /* text-slate-50 */
-        }
-        .dark .bg-slate-50 {
-            background-color: #0f172a !important;
-            border-color: #334155 !important;
+        .dark .text-slate-900, .dark .font-bold.text-slate-800, .dark h1, .dark h2, .dark h3, .dark h4 {
+            color: #ffffff !important; /* bold titles */
         }
         .dark input, .dark select, .dark textarea {
-            background-color: #0f172a !important;
-            color: #f1f5f9 !important;
-            border-color: #334155 !important;
+            background-color: #0b0f19 !important;
+            color: #f8fafc !important;
+            border-color: #374151 !important;
         }
-        .dark .unified-table th {
-            background-color: #0f172a !important;
-            color: #f1f5f9 !important;
+        .dark input::placeholder, .dark textarea::placeholder {
+            color: #4b5563 !important;
         }
-        .dark .unified-table td {
-            color: #cbd5e1 !important;
+        
+        /* Table dark overrides */
+        .dark table, .dark .fig-table, .dark .unified-table {
+            border-color: #374151 !important;
         }
+        .dark th, .dark .fig-table th, .dark .unified-table th {
+            background-color: #1f2937 !important;
+            color: #f8fafc !important;
+            border-bottom: 2px solid #374151 !important;
+        }
+        .dark td, .dark .fig-table td, .dark .unified-table td {
+            color: #e2e8f0 !important;
+            border-bottom: 1px solid #1f2937 !important;
+        }
+        .dark tr:hover, .dark .fig-table tr:hover {
+            background-color: #1e293b/40 !important;
+        }
+        
+        /* Badges */
         .dark .unified-badge-neutral {
-            background-color: #334155 !important;
-            color: #cbd5e1 !important;
+            background-color: #374151 !important;
+            color: #f1f5f9 !important;
         }
+        
         /* Top bar dark style */
-        .dark .top-bar-unified {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
+        .dark .top-bar-unified, .dark .topbar-actions {
+            background-color: #161e2e !important;
+            border-color: #374151 !important;
         }
         .dark .top-bar-unified h2 {
-            color: #f8fafc !important;
+            color: #ffffff !important;
         }
         .dark .top-bar-unified p {
             color: #94a3b8 !important;
