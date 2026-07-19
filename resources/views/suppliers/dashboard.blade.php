@@ -1,21 +1,9 @@
-@extends('layouts.erp')
+@extends('layouts.master')
 
-@section('title', 'Supplier Management — Dashboard')
+@section('title', 'Supplier Directory')
+@section('subtitle', 'Manage and evaluate your agricultural suppliers')
 
 @section('content')
-    
-
-    {{-- Page Title --}}
-    <div class="mb-6">
-        <div class="page-title">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="color:#2D6A4F">
-                <path d="M12 2C8 2 4 5 4 9c0 5.25 7 13 8 13s8-7.75 8-13c0-4-4-7-8-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" fill="#2D6A4F"/>
-                <path d="M17 3c-1.4-1.4-3.1-2-5-2s-3.6.6-5 2" stroke="#2D6A4F" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <span>Supplier Management</span>
-        </div>
-        <p class="page-subtitle">Manage and evaluate your agricultural suppliers</p>
-    </div>
 
     {{-- KPI Cards --}}
     <div class="grid grid-cols-4 gap-4 mb-6">

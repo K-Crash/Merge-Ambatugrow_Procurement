@@ -310,64 +310,169 @@
             display: flex !important;
         }
 
-        /* Real Working Dark Mode styling sheet */
+        /* Premium High-Contrast Dark Mode Stylesheet */
         .dark body {
-            background-color: #0f172a !important; /* bg-slate-900 */
-            color: #f1f5f9 !important; /* text-slate-100 */
+            background-color: #090d16 !important; /* deep rich dark void */
+            color: #f8fafc !important; /* pristine slate white */
         }
-        .dark .bg-slate-100 {
-            background-color: #0f172a !important;
+        .dark .bg-slate-100, .dark .bg-\[\#f9fafb\], .dark .bg-\[\#F9FAFB\], .dark main.flex-grow {
+            background-color: #090d16 !important;
         }
-        .dark .bg-white {
-            background-color: #1e293b !important; /* bg-slate-800 */
-            color: #f1f5f9 !important;
+        .dark .bg-white, .dark .bg-slate-50, .dark .bg-slate-50\/50, .dark .bg-slate-100\/50 {
+            background-color: #111827 !important; /* solid card dark */
+            color: #f8fafc !important;
         }
-        .dark .card, .dark .bg-[#e8ece6], .dark .bg-[#f4f7f3] {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
+        .dark .card {
+            background-color: #111827 !important;
+            border-color: #1e293b !important;
         }
-        .dark .border-slate-200, .dark .border-slate-200\/60, .dark .border-slate-200\/50, .dark .border-slate-350, .dark .border-slate-300 {
-            border-color: #334155 !important;
+        .dark .border-slate-200, .dark .border-slate-100, .dark .border-slate-200\/60, .dark .border-slate-200\/50, .dark .border-slate-350, .dark .border-slate-300 {
+            border-color: #1e293b !important;
         }
-        .dark .text-slate-700, .dark .text-slate-805, .dark .text-slate-800, .dark .text-slate-900, .dark .text-slate-750 {
-            color: #cbd5e1 !important; /* text-slate-300 */
+        
+        /* High Contrast Typography Adjustments (Light Mode) */
+        body {
+            color: #0f172a !important; /* solid charcoal */
         }
-        .dark .text-slate-500, .dark .text-slate-600 {
-            color: #94a3b8 !important; /* text-slate-400 */
+        .text-slate-500, .text-gray-500, .text-slate-400, .text-gray-400 {
+            color: #4b5563 !important; /* rich gray - readable on white */
         }
-        .dark .text-slate-400 {
-            color: #64748b !important; /* text-slate-500 */
+        .text-slate-600, .text-gray-600 {
+            color: #374151 !important; /* dark slate gray */
         }
-        .dark .text-slate-900 {
-            color: #f8fafc !important; /* text-slate-50 */
+        .text-slate-700, .text-gray-700, .text-slate-800, .text-gray-800 {
+            color: #1f2937 !important; /* deep near-black */
         }
-        .dark .bg-slate-50 {
-            background-color: #0f172a !important;
-            border-color: #334155 !important;
+
+        /* High Contrast Typography Mappings (Dark Mode - Scoped outside sidebar) */
+        .dark :not(aside):not(aside *) .text-slate-750, 
+        .dark :not(aside):not(aside *) .text-slate-805, 
+        .dark :not(aside):not(aside *) .text-slate-800, 
+        .dark :not(aside):not(aside *) .text-slate-900, 
+        .dark :not(aside):not(aside *) .text-gray-800, 
+        .dark :not(aside):not(aside *) .text-gray-900,
+        .dark :not(aside):not(aside *) [class*="text-slate-8"], 
+        .dark :not(aside):not(aside *) [class*="text-slate-9"],
+        .dark :not(aside):not(aside *) [class*="text-gray-8"], 
+        .dark :not(aside):not(aside *) [class*="text-gray-9"],
+        .dark :not(aside):not(aside *) [class*="text-neutral-8"], 
+        .dark :not(aside):not(aside *) [class*="text-neutral-9"] {
+            color: #ffffff !important; /* maximum brightness for headings/bold labels */
         }
+        
+        .dark :not(aside):not(aside *) .text-slate-700, 
+        .dark :not(aside):not(aside *) .text-slate-600, 
+        .dark :not(aside):not(aside *) .text-gray-700, 
+        .dark :not(aside):not(aside *) .text-gray-600,
+        .dark :not(aside):not(aside *) [class*="text-slate-6"], 
+        .dark :not(aside):not(aside *) [class*="text-slate-7"],
+        .dark :not(aside):not(aside *) [class*="text-gray-6"], 
+        .dark :not(aside):not(aside *) [class*="text-gray-7"],
+        .dark :not(aside):not(aside *) [class*="text-neutral-6"], 
+        .dark :not(aside):not(aside *) [class*="text-neutral-7"] {
+            color: #f1f5f9 !important; /* very clear off-white for regular body text */
+        }
+        
+        .dark :not(aside):not(aside *) .text-slate-500, 
+        .dark :not(aside):not(aside *) .text-gray-500,
+        .dark :not(aside):not(aside *) [class*="text-slate-4"], 
+        .dark :not(aside):not(aside *) [class*="text-slate-5"],
+        .dark :not(aside):not(aside *) [class*="text-gray-4"], 
+        .dark :not(aside):not(aside *) [class*="text-gray-5"],
+        .dark :not(aside):not(aside *) [class*="text-neutral-4"], 
+        .dark :not(aside):not(aside *) [class*="text-neutral-5"] {
+            color: #cbd5e1 !important; /* clear light gray for secondary labels/descriptions */
+        }
+
+        .dark :not(aside):not(aside *) .text-slate-400, 
+        .dark :not(aside):not(aside *) .text-gray-400 {
+            color: #94a3b8 !important; /* muted gray - still readable on void background */
+        }
+        
+        /* Dynamic Accent Elements (Scoped outside sidebar) */
+        .dark :not(aside):not(aside *) .text-\[\#235c2b\], 
+        .dark :not(aside):not(aside *) .text-green-800, 
+        .dark :not(aside):not(aside *) .text-[#1f5c3d] {
+            color: #34d399 !important; /* mint green for high contrast */
+        }
+        .dark :not(aside):not(aside *) .bg-\[\#235c2b\], 
+        .dark :not(aside):not(aside *) .bg-emerald-600, 
+        .dark :not(aside):not(aside *) .bg-emerald-700 {
+            background-color: #059669 !important; /* high visibility green button */
+            color: #ffffff !important;
+        }
+        .dark :not(aside):not(aside *) .bg-\[\#235c2b\]:hover, 
+        .dark :not(aside):not(aside *) .bg-emerald-600:hover, 
+        .dark :not(aside):not(aside *) .bg-emerald-700:hover {
+            background-color: #10b981 !important;
+        }
+        
+        /* Form controls */
         .dark input, .dark select, .dark textarea {
-            background-color: #0f172a !important;
-            color: #f1f5f9 !important;
-            border-color: #334155 !important;
+            background-color: #090d16 !important;
+            color: #f8fafc !important;
+            border-color: #1e293b !important;
         }
-        .dark .unified-table th {
-            background-color: #0f172a !important;
-            color: #f1f5f9 !important;
+        .dark input:focus, .dark select:focus, .dark textarea:focus {
+            border-color: #34d399 !important;
+            outline: none;
         }
-        .dark .unified-table td {
-            color: #cbd5e1 !important;
+        
+        /* Table Styling */
+        .dark table, .dark .fig-table, .dark .unified-table {
+            border-color: #1e293b !important;
+        }
+        .dark th, .dark .fig-table th, .dark .unified-table th {
+            background-color: #111827 !important;
+            color: #ffffff !important;
+            border-bottom: 2px solid #1e293b !important;
+        }
+        .dark td, .dark .fig-table td, .dark .unified-table td {
+            color: #e2e8f0 !important;
+            border-bottom: 1px solid #1e293b !important;
+        }
+        .dark tr:hover, .dark .fig-table tr:hover {
+            background-color: #1e293b/40 !important;
+        }
+        
+        /* Modern Glowing Status Badges */
+        .dark .badge-active, .dark .unified-badge-active {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            color: #34d399 !important;
+            border: 1px solid rgba(16, 185, 129, 0.25) !important;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-weight: 700;
+        }
+        .dark .badge-pending, .dark .unified-badge-pending {
+            background-color: rgba(245, 158, 11, 0.12) !important;
+            color: #fbbf24 !important;
+            border: 1px solid rgba(245, 158, 11, 0.25) !important;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-weight: 700;
+        }
+        .dark .badge-blacklisted, .dark .unified-badge-blacklisted {
+            background-color: rgba(239, 68, 68, 0.12) !important;
+            color: #f87171 !important;
+            border: 1px solid rgba(239, 68, 68, 0.25) !important;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-weight: 700;
         }
         .dark .unified-badge-neutral {
-            background-color: #334155 !important;
-            color: #cbd5e1 !important;
-        }
-        /* Top bar dark style */
-        .dark .top-bar-unified {
             background-color: #1e293b !important;
-            border-color: #334155 !important;
+            color: #cbd5e1 !important;
+            border: 1px solid #334155 !important;
+        }
+        
+        /* Top bar styling */
+        .dark .top-bar-unified, .dark .topbar-actions {
+            background-color: #111827 !important;
+            border-color: #1e293b !important;
         }
         .dark .top-bar-unified h2 {
-            color: #f8fafc !important;
+            color: #ffffff !important;
         }
         .dark .top-bar-unified p {
             color: #94a3b8 !important;

@@ -1,12 +1,9 @@
-@extends('layouts.erp')
+@extends('layouts.master')
 
 @section('title', 'Pending Verification')
+@section('subtitle', 'Supplier accounts awaiting verification review')
 
 @section('content')
-    
-    <div class="flex items-center justify-between mb-6">
-        <h1 style="font-size:26px; font-weight:700; color:#111827; letter-spacing:-0.02em;">Pending Verification</h1>
-    </div>
 
     @if (count($suppliers) > 0)
     <div class="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-[13px] font-medium mb-4">

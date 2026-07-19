@@ -90,6 +90,46 @@ class PurchaseOrderController extends Controller
                 'unit_price' => $it['unit_price'],
                 'line_total' => $line,
             ]);
+
+            // Synchronize with Supplier Management po_items table
+            $product = \App\Models\Product::where('sku', $it['sku'] ?? '')
+                ->orWhere('name', $it['name'])
+                ->first();
+            
+            if (!$product) {
+                $cat = \App\Models\Category::first();
+                if (!$cat) {
+                    $cat = \App\Models\Category::create(['category_name' => 'Uncategorized']);
+                }
+                $uom = \App\Models\UnitOfMeasure::first();
+                if (!$uom) {
+                    $uom = \App\Models\UnitOfMeasure::create(['uom_code' => 'Unit', 'uom_name' => 'Unit']);
+                }
+                $curr = \App\Models\Currency::first();
+                if (!$curr) {
+                    $curr = \App\Models\Currency::create(['currency_code' => 'PHP', 'currency_name' => 'Philippine Peso', 'exchange_rate' => 1.0000]);
+                }
+                
+                $product = \App\Models\Product::create([
+                    'sku' => $it['sku'] ?? ('SKU-' . strtoupper(Str::random(6))),
+                    'name' => $it['name'],
+                    'category_id' => $cat->id,
+                    'uom_id' => $uom->id,
+                    'currency_id' => $curr->id,
+                    'base_price' => $it['unit_price'],
+                    'min_quantity_threshold' => 10,
+                    'lead_time_days' => 3,
+                ]);
+            }
+
+            \App\Models\POItem::create([
+                'po_id' => $po->id,
+                'product_id' => $product->id,
+                'quantity' => $it['quantity'],
+                'uom_id' => $product->uom_id,
+                'unit_price' => $it['unit_price'],
+            ]);
+
             $total += $line;
         }
 

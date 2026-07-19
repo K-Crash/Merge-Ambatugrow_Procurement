@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             RequisitionDemoSeeder::class,
             SupplierSeeder::class,
             PurchaseOrderSeeder::class,
+            MassProcurementSeeder::class,
         ]);
     }
 }

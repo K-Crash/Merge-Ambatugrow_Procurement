@@ -1,16 +1,16 @@
-@extends('layouts.erp')
+@extends('layouts.master')
 
 @section('title', 'Active Suppliers')
+@section('subtitle', 'Verified active vendor accounts')
+
+@section('topbar-actions')
+    <a href="{{ route('suppliers.create') }}" class="top-bar-btn bg-emerald-600/80 hover:bg-emerald-700/90 border-emerald-500/30 flex items-center gap-1">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        <span>Add Supplier</span>
+    </a>
+@endsection
 
 @section('content')
-    
-    <div class="flex items-center justify-between mb-6">
-        <h1 style="font-size:26px; font-weight:700; color:#111827; letter-spacing:-0.02em;">Active Suppliers</h1>
-        <a href="{{ route('suppliers.create') }}" class="btn-primary">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Add Supplier
-        </a>
-    </div>
 
     <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <table class="fig-table">
