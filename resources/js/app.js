@@ -94,8 +94,19 @@ Alpine.data('appLayout', (initialData = {}) => ({
     department: 'Farm Operations',
     requestorName: initialData.requestorName || '',
     suppliersList: initialData.suppliersList || [],
+    catalogProducts: initialData.catalogProducts || [],
     reqItems: initialData.reqItems || [{ sku: '', name: '', unit: 'Unit', qty: 1, cost: 0, justification: '' }],
     poItems: initialData.poItems || [{ sku: '', name: '', unit: 'Unit', qty: 1, cost: 0 }],
+    selectCatalogItem(itemIndex, productId) {
+        if (!productId) return;
+        const prod = this.catalogProducts.find(p => p.id == productId);
+        if (prod && this.reqItems[itemIndex]) {
+            this.reqItems[itemIndex].sku = prod.sku || '';
+            this.reqItems[itemIndex].name = prod.name || '';
+            this.reqItems[itemIndex].unit = prod.uom ? (prod.uom.uom_code || prod.uom.uom_name) : 'Unit';
+            this.reqItems[itemIndex].cost = Number(prod.base_price || 0);
+        }
+    },
     addReqItem() {
         this.reqItems.push({ sku: '', name: '', unit: 'Unit', qty: 1, cost: 0, justification: '' });
     },

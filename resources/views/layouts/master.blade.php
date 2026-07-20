@@ -1,5 +1,6 @@
 @php
     $suppliers = \App\Models\Supplier::orderBy('name')->get();
+    $catalogProducts = \App\Models\Product::with('uom')->orderBy('name')->get();
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -481,7 +482,7 @@
     @stack('head')
     @stack('styles')
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased" x-data='appLayout({ requestorName: @json(auth()->check() ? auth()->user()->name : ""), suppliersList: @json($suppliers ?? []) })'
+<body class="bg-slate-100 text-slate-800 antialiased" x-data='appLayout({ requestorName: @json(auth()->check() ? auth()->user()->name : ""), suppliersList: @json($suppliers ?? []), catalogProducts: @json($catalogProducts ?? []) })'
       @open-requisition-modal.window="showRequisitionModal = true"
       @open-po-modal.window="showPoModal = true">
 @php
@@ -1270,6 +1271,19 @@
                                         <button type="button" @click="if(reqItems.length > 1) removeReqItem(index)" class="absolute top-1 right-2 text-slate-400 hover:text-red-500 md:hidden">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
+                                        
+                                        <!-- Database Order Catalog Dropdown -->
+                                        <div class="col-span-12 pb-1 border-b border-slate-100">
+                                            <label class="block text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                                <i class="fa-solid fa-cart-shopping text-emerald-600"></i> Select Order Item (Database Catalog)
+                                            </label>
+                                            <select @change="selectCatalogItem(index, $event.target.value)" class="w-full px-2.5 py-1.5 border border-emerald-300 rounded-lg text-xs bg-emerald-50/50 text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                                                <option value="">-- Select Order Item from Database --</option>
+                                                <template x-for="prod in catalogProducts" :key="prod.id">
+                                                    <option :value="prod.id" x-text="prod.sku + ' - ' + prod.name + ' (₱' + Number(prod.base_price).toLocaleString('en-US', {minimumFractionDigits: 2}) + ')'"></option>
+                                                </template>
+                                            </select>
+                                        </div>
                                         <div class="col-span-12 md:col-span-2">
                                             <label class="block text-[10px] font-semibold text-slate-400 mb-0.5 md:hidden">SKU</label>
                                             <input type="text" x-model="item.sku" :name="'items[' + index + '][sku]'" placeholder="e.g. AGRI-SEED-042" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
