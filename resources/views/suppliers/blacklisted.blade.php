@@ -5,10 +5,10 @@
 
 @section('content')
 
-<div class="max-w-5xl mx-auto">
+<div class="max-w-6xl mx-auto">
 
     {{-- KPI Cards --}}
-    <div class="grid grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {{-- Total Suppliers --}}
         <a href="{{ route('suppliers.index') }}" class="kpi-card hover:shadow-md transition-shadow">
             <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
@@ -78,28 +78,26 @@
     @endif
 
     {{-- Table Card --}}
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
         {{-- Search / Filter Toolbar --}}
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-55/20 gap-4">
+        <form method="GET" action="{{ route('suppliers.blacklisted') }}" id="blacklist-filter-form" class="flex flex-col sm:flex-row items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-800 bg-gray-55/20 gap-4">
             <div class="search-box !w-full max-w-md">
                 <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
-                <input type="text" id="blacklist-search" placeholder="Search blacklisted suppliers…" class="!w-full">
+                <input type="text" name="q" value="{{ request('q') }}" id="blacklist-search" placeholder="Search blacklisted suppliers…" class="!w-full">
             </div>
-            <div class="flex items-center gap-3 shrink-0">
-                <select class="btn-outline text-sm">
-                    <option>All Status</option>
-                    <option>Active</option>
-                    <option>Blacklisted</option>
-                </select>
-                <select class="btn-outline text-sm">
-                    <option>All Risk Levels</option>
-                    <option>Critical</option>
-                    <option>High</option>
-                    <option>Medium</option>
-                    <option>Low</option>
+
+            {{-- Requirement 5: Removed Status filter, keep ONLY Risk Level filter --}}
+            <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto">
+                <label for="risk-filter-select" class="text-xs font-bold text-slate-700 dark:text-slate-300">Risk Level:</label>
+                <select name="risk" id="risk-filter-select" onchange="this.form.submit()" class="btn-outline text-sm font-semibold rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white cursor-pointer focus:ring-2 focus:ring-emerald-500">
+                    <option value="All Risk Levels" {{ ($currentRisk ?? request('risk')) === 'All Risk Levels' ? 'selected' : '' }}>All Risk Levels</option>
+                    <option value="Critical" {{ ($currentRisk ?? request('risk')) === 'Critical' ? 'selected' : '' }}>Critical</option>
+                    <option value="High" {{ ($currentRisk ?? request('risk')) === 'High' ? 'selected' : '' }}>High</option>
+                    <option value="Medium" {{ ($currentRisk ?? request('risk')) === 'Medium' ? 'selected' : '' }}>Medium</option>
+                    <option value="Low" {{ ($currentRisk ?? request('risk')) === 'Low' ? 'selected' : '' }}>Low</option>
                 </select>
             </div>
-        </div>
+        </form>
 
         <table class="fig-table" id="blacklist-table">
             <thead>
@@ -121,48 +119,47 @@
                             default    => 'badge-risk-low',
                         };
                     @endphp
-                    <tr class="cursor-pointer" onclick="{{ $b['slug'] ? "window.location='" . route('suppliers.show', $b['slug']) . "'" : '' }}">
+                    <tr class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" onclick="{{ !empty($b['slug']) ? "window.location='" . route('suppliers.show', $b['slug']) . "'" : '' }}">
                         <td style="padding-left:20px">
                             <div class="flex items-center gap-3">
-                                <div class="avatar"></div>
+                                <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 flex items-center justify-center font-bold text-xs shrink-0">
+                                    {{ strtoupper(substr($b['supplier'], 0, 1)) }}
+                                </div>
                                 <div>
-                                    <div class="supplier-name">{{ $b['supplier'] }}</div>
+                                    <div class="supplier-name font-bold text-slate-900 dark:text-white">{{ $b['supplier'] }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td><span class="supplier-id text-sm">{{ $b['supplier_id'] }}</span></td>
-                        <td class="text-gray-600 text-[13px]">{{ $b['reason'] }}</td>
-                        <td class="text-gray-500 text-[13px]">{{ $b['since'] }}</td>
+                        <td><span class="supplier-id text-sm font-semibold text-slate-700 dark:text-slate-300">{{ $b['supplier_id'] }}</span></td>
+                        <td class="text-slate-700 dark:text-slate-300 text-[13px] font-medium">{{ $b['reason'] }}</td>
+                        <td class="text-slate-500 dark:text-slate-400 text-[13px]">{{ $b['since'] }}</td>
                         <td style="padding-right:20px">
-                            <span class="{{ $riskClass }}">{{ $b['risk'] }}</span>
+                            <span class="{{ $riskClass }} font-bold px-2.5 py-1 rounded-full text-xs">{{ $b['risk'] }}</span>
                         </td>
                     </tr>
                 @empty
+                    {{-- Requirement 5: Display exact empty state message when no record exists --}}
                     <tr>
                         <td colspan="5">
-                            <div class="empty-state">
-                                <svg class="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <p class="text-base font-semibold text-gray-450">No blacklisted suppliers</p>
-                                <p class="text-sm text-gray-400">All suppliers are compliant.</p>
+                            <div class="empty-state text-center py-12 px-4">
+                                <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                </svg>
+                                <p class="text-base font-bold text-slate-700 dark:text-slate-200">No blacklisted suppliers found for this risk level.</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Try selecting a different risk level filter or clearing your search term.</p>
                             </div>
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
-        <div class="px-5 py-3.5 border-t border-gray-100 text-[13px] font-semibold text-red-700">
-            Showing {{ count($blacklisted) }} blacklisted supplier(s)
+        <div class="px-5 py-3.5 border-t border-gray-100 dark:border-slate-800 text-[13px] font-bold text-red-700 dark:text-red-400 flex items-center justify-between">
+            <span>Showing {{ count($blacklisted) }} blacklisted supplier(s)</span>
+            @if (($currentRisk ?? request('risk')) && ($currentRisk ?? request('risk')) !== 'All Risk Levels')
+                <span class="text-xs text-slate-500 dark:text-slate-400">Filter: <strong>{{ $currentRisk ?? request('risk') }} Risk Level</strong></span>
+            @endif
         </div>
     </div>
-
-    {{-- Inline search filter script --}}
-    <script>
-        document.getElementById('blacklist-search')?.addEventListener('input', function() {
-            const q = this.value.toLowerCase();
-            document.querySelectorAll('#blacklist-table tbody tr').forEach(function(row) {
-                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-            });
-        });
-    </script>
 </div>
+
 @endsection

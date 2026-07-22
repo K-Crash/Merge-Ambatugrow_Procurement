@@ -30,33 +30,47 @@ class SupplierController extends Controller
     /**
      * Combines suppliers with status=Blacklisted with standalone blacklist-only entries.
      */
-    protected function blacklisted()
+    protected function blacklisted($riskFilter = null)
     {
-        $fromSuppliers = Supplier::where('status', 'Blacklisted')->get()->map(fn ($s) => [
+        $fromSuppliersQuery = Supplier::where('status', 'Blacklisted');
+        if ($riskFilter && $riskFilter !== 'All Risk Levels') {
+            $fromSuppliersQuery->where('risk_level', $riskFilter);
+        }
+        $fromSuppliers = $fromSuppliersQuery->get()->map(fn ($s) => [
             'supplier' => $s->supplier_name,
             'slug' => $s->slug,
             'supplier_id' => $s->supplier_id,
             'reason' => $s->blacklist_reason,
             'since' => $s->blacklisted_since ? $s->blacklisted_since->format('M. d, Y') : null,
-            'risk' => $s->risk_level,
+            'risk' => $s->risk_level ?? 'High',
         ]);
 
-        $standalone = BlacklistedSupplier::all()->map(fn ($b) => [
+        $standaloneQuery = BlacklistedSupplier::query();
+        if ($riskFilter && $riskFilter !== 'All Risk Levels') {
+            $standaloneQuery->where('risk_level', $riskFilter);
+        }
+        $standalone = $standaloneQuery->get()->map(fn ($b) => [
             'supplier' => $b->name,
             'slug' => null,
             'supplier_id' => $b->supplier_code,
             'reason' => $b->reason,
             'since' => $b->since,
-            'risk' => $b->risk_level,
+            'risk' => $b->risk_level ?? 'Critical',
         ]);
 
-        return $fromSuppliers->concat($standalone)->values();
+        $combined = $fromSuppliers->concat($standalone)->values();
+
+        if ($riskFilter && $riskFilter !== 'All Risk Levels') {
+            $combined = $combined->filter(fn ($item) => strtolower($item['risk'] ?? '') === strtolower($riskFilter))->values();
+        }
+
+        return $combined;
     }
 
-    // Image 1 - Supplier Management dashboard
+    // Supplier Management dashboard
     public function dashboard()
     {
-        $suppliers = Supplier::latest()->get()->toArray();
+        $suppliers = Supplier::latest()->take(10)->get()->toArray();
 
         return view('suppliers.dashboard', [
             'suppliers' => $suppliers,
@@ -64,7 +78,7 @@ class SupplierController extends Controller
         ]);
     }
 
-    // Image 3 - Suppliers list
+    // Suppliers list with pagination and search
     public function index(Request $request)
     {
         $keyword = (string) $request->query('q', '');
@@ -86,32 +100,62 @@ class SupplierController extends Controller
             });
         }
 
-        $suppliers = $query->latest()->get()->toArray();
+        $suppliers = $query->latest()->paginate(15)->withQueryString();
 
         return view('suppliers.index', [
             'suppliers' => $suppliers,
         ]);
     }
 
-    public function activeIndex()
+    public function activeIndex(Request $request)
     {
-        $suppliers = Supplier::where('status', 'Active')->latest()->get()->toArray();
+        $keyword = (string) $request->query('q', '');
+        $keyword = trim($keyword);
+
+        $query = Supplier::where('status', 'Active');
+
+        if ($keyword !== '') {
+            $pattern = "%{$keyword}%";
+            $query->where(function ($q) use ($pattern) {
+                $q->where('supplier_name', 'like', $pattern)
+                  ->orWhere('location', 'like', $pattern)
+                  ->orWhere('supplier_code', 'like', $pattern)
+                  ->orWhere('supplier_id', 'like', $pattern);
+            });
+        }
+
+        $suppliers = $query->latest()->paginate(15)->withQueryString();
 
         return view('suppliers.active', [
             'suppliers' => $suppliers,
         ]);
     }
 
-    public function pendingIndex()
+    public function pendingIndex(Request $request)
     {
-        $suppliers = Supplier::where('status', 'Pending Verification')->latest()->get()->toArray();
+        $keyword = (string) $request->query('q', '');
+        $keyword = trim($keyword);
+
+        $query = Supplier::where('status', 'Pending Verification');
+
+        if ($keyword !== '') {
+            $pattern = "%{$keyword}%";
+            $query->where(function ($q) use ($pattern) {
+                $q->where('supplier_name', 'like', $pattern)
+                  ->orWhere('location', 'like', $pattern)
+                  ->orWhere('supplier_code', 'like', $pattern)
+                  ->orWhere('supplier_id', 'like', $pattern);
+            });
+        }
+
+        $suppliers = $query->latest()->paginate(15)->withQueryString();
 
         return view('suppliers.pending', [
             'suppliers' => $suppliers,
         ]);
     }
 
-    // Image 2 - Add new supplier form
+    // Add new supplier form
     public function create()
     {
         return view('suppliers.create');
@@ -146,7 +190,6 @@ class SupplierController extends Controller
         }
 
         try {
-            // 1. Create address
             $supplierAddress = Address::create([
                 'street' => $data['address'],
                 'city' => 'Manila',
@@ -155,7 +198,6 @@ class SupplierController extends Controller
                 'country' => 'Philippines',
             ]);
 
-            // 2. Create supplier
             $supplier = Supplier::create([
                 'slug' => $slug,
                 'supplier_name' => $data['company_name'],
@@ -180,7 +222,6 @@ class SupplierController extends Controller
                 'location' => 'Metro Manila',
             ]);
 
-            // 3. Attach products
             foreach ($data['products'] as $prodName) {
                 $product = Product::where('name', $prodName)->first();
                 if (!$product) {
@@ -220,7 +261,7 @@ class SupplierController extends Controller
         return redirect()->back()->withInput()->withErrors(['db' => 'Unknown error creating supplier.']);
     }
 
-    // Image 4 - Supplier overview
+    // Supplier overview
     public function show(string $supplier)
     {
         $s = Supplier::with(['productsRelation', 'purchaseOrders', 'contractHistoryEntries', 'addressRelation'])
@@ -229,13 +270,16 @@ class SupplierController extends Controller
         $data = $s->toArray();
         $data['products'] = $s->products;
         $data['purchase_history'] = $s->purchase_history;
+        $data['status'] = $s->status;
+        $data['blacklist_reason'] = $s->blacklist_reason;
+        $data['blacklisted_since'] = $s->blacklisted_since ? $s->blacklisted_since->format('M. d, Y') : null;
 
         return view('suppliers.show', [
             'supplier' => $data,
         ]);
     }
 
-    // Image 5 - Product details
+    // Product details
     public function products(string $supplier)
     {
         $s = Supplier::with('productsRelation')->where('slug', $supplier)->firstOrFail();
@@ -248,7 +292,7 @@ class SupplierController extends Controller
         ]);
     }
 
-    // Image 6 - Purchase history
+    // Purchase history
     public function purchaseHistory(string $supplier)
     {
         $s = Supplier::with('purchaseOrders')->where('slug', $supplier)->firstOrFail();
@@ -261,7 +305,7 @@ class SupplierController extends Controller
         ]);
     }
 
-    // Image 7 - Contract information
+    // Contract information
     public function contract(string $supplier)
     {
         $s = Supplier::with('contractHistoryEntries')->where('slug', $supplier)->firstOrFail();
@@ -271,7 +315,7 @@ class SupplierController extends Controller
         ]);
     }
 
-    // Image 8 - Performance
+    // Performance
     public function performance(string $supplier)
     {
         $s = Supplier::with(['productsRelation', 'purchaseOrders'])->where('slug', $supplier)->firstOrFail();
@@ -285,12 +329,75 @@ class SupplierController extends Controller
         ]);
     }
 
-    // Image 9 - Blacklisted suppliers
-    public function blacklistedIndex()
+    // Blacklisted suppliers with Risk Level filter and search
+    public function blacklistedIndex(Request $request)
     {
+        $risk = $request->query('risk', 'All Risk Levels');
+        $keyword = trim((string) $request->query('q', ''));
+
+        $items = $this->blacklisted($risk);
+
+        if ($keyword !== '') {
+            $pattern = strtolower($keyword);
+            $items = $items->filter(function ($b) use ($pattern) {
+                return str_contains(strtolower($b['supplier'] ?? ''), $pattern) ||
+                       str_contains(strtolower($b['supplier_id'] ?? ''), $pattern) ||
+                       str_contains(strtolower($b['reason'] ?? ''), $pattern);
+            })->values();
+        }
+
         return view('suppliers.blacklisted', [
-            'blacklisted' => $this->blacklisted(),
+            'blacklisted' => $items,
+            'currentRisk' => $risk,
             'stats' => $this->stats(),
         ]);
+    }
+
+    // Requirement 3: Block Supplier action requiring reason
+    public function block(Request $request, string $supplier)
+    {
+        $request->validate([
+            'blacklist_reason' => ['required', 'string', 'min:3'],
+        ], [
+            'blacklist_reason.required' => 'A reason for blocking is required before blocking a supplier.',
+        ]);
+
+        $s = Supplier::where('slug', $supplier)->firstOrFail();
+
+        $s->update([
+            'status' => 'Blacklisted',
+            'blacklist_reason' => $request->input('blacklist_reason'),
+            'blacklisted_since' => now(),
+            'risk_level' => $request->input('risk_level', $s->risk_level ?? 'High'),
+        ]);
+
+        // Sync or create standalone BlacklistedSupplier entry
+        BlacklistedSupplier::updateOrCreate(
+            ['supplier_code' => $s->supplier_id ?: $s->supplier_code],
+            [
+                'name' => $s->supplier_name ?: $s->name,
+                'reason' => $request->input('blacklist_reason'),
+                'blacklisted_since' => now()->format('Y-m-d'),
+                'risk_level' => $request->input('risk_level', $s->risk_level ?? 'High'),
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Supplier has been blocked and moved to blacklisted suppliers.');
+    }
+
+    // Requirement 2: Unblock Supplier action
+    public function unblock(Request $request, string $supplier)
+    {
+        $s = Supplier::where('slug', $supplier)->firstOrFail();
+
+        $s->update([
+            'status' => 'Active',
+            'blacklist_reason' => null,
+            'blacklisted_since' => null,
+        ]);
+
+        BlacklistedSupplier::where('supplier_code', $s->supplier_id ?: $s->supplier_code)->delete();
+
+        return redirect()->back()->with('success', 'Supplier has been unblocked and restored to Active status.');
     }
 }

@@ -39,6 +39,12 @@ Route::prefix('api')->middleware(['auth'])->group(function () {
 
 Route::prefix('goods-receipt-invoice-matching')->middleware(['auth'])->group(function () {
     Route::get('/', [MatchingController::class, 'index'])->name('matching.index');
+    Route::post('/record-grn', [MatchingController::class, 'storeGrn'])->name('matching.store_grn');
+    Route::get('/po-items/{purchaseOrder}', [MatchingController::class, 'getPoItems'])->name('matching.po_items');
+    Route::post('/approve/{id}', [MatchingController::class, 'approvePayment'])->name('matching.approve');
+    Route::post('/run-matching', [MatchingController::class, 'runThreeWayMatching'])->name('matching.run_matching');
+    Route::get('/details/{po_number}', [MatchingController::class, 'getMatchingDetails'])->name('matching.details');
+    Route::post('/receive-goods', [MatchingController::class, 'storeGrn'])->name('matching.receive_goods');
 });
 
 Route::prefix('order-management')->middleware(['auth'])->group(function () {
@@ -83,6 +89,8 @@ Route::prefix('supplier-management')->middleware(['auth'])->group(function () {
         Route::get('/purchase-history', [SupplierController::class, 'purchaseHistory'])->name('suppliers.purchase-history');
         Route::get('/contract', [SupplierController::class, 'contract'])->name('suppliers.contract');
         Route::get('/performance', [SupplierController::class, 'performance'])->name('suppliers.performance');
+        Route::post('/block', [SupplierController::class, 'block'])->name('suppliers.block');
+        Route::post('/unblock', [SupplierController::class, 'unblock'])->name('suppliers.unblock');
     });
 });
 

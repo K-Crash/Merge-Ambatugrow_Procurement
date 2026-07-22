@@ -71,7 +71,17 @@ class PurchaseOrderController extends Controller
         ]);
 
         // create PO
-        $poNumber = 'PO-'.date('Y').'-'.str_pad((int) (PurchaseOrder::count()+1), 3, '0', STR_PAD_LEFT);
+        $year = date('Y');
+        $latest = PurchaseOrder::where('po_number', 'like', "PO-{$year}-%")
+            ->orderByRaw('length(po_number) desc, po_number desc')
+            ->first();
+        $nextNumber = 1;
+        if ($latest) {
+            $parts = explode('-', $latest->po_number);
+            $lastNumber = (int) end($parts);
+            $nextNumber = $lastNumber + 1;
+        }
+        $poNumber = 'PO-'.$year.'-'.str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
         $po = PurchaseOrder::create([
             'po_number' => $poNumber,
             'supplier_id' => $data['supplier_id'],

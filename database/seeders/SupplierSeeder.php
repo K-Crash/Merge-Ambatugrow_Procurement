@@ -483,6 +483,88 @@ class SupplierSeeder extends Seeder
             ],
         ];
 
+        // Dynamically add sample suppliers up to 125 records (Requirement 6)
+        $initialCount = count($suppliers);
+        $locations = ['Manila', 'Quezon City', 'Makati City', 'Davao City', 'Cebu City', 'Taguig City', 'Pasig City', 'Iloilo City', 'Cagayan de Oro', 'Baguio City'];
+        $businessTypes = ['Corporation', 'Cooperative', 'Partnership', 'Sole Proprietorship'];
+        $companyPrefixes = ['Agri', 'Green', 'Harvest', 'Bio', 'Eco', 'Terra', 'Farm', 'Crop', 'Flora', 'Verdant', 'Golden', 'Pacific', 'Apex', 'Global', 'Sun', 'Valley'];
+        $companySuffixes = ['Supplies Co.', 'Agri-Ventures', 'Farming Systems', 'Trading Inc.', 'Products Ltd.', 'Solutions', 'Holdings', 'Enterprises', 'Produce Corp.', 'Groceries'];
+        $reasons = [
+            'Fraudulent transactions',
+            'Repeated late deliveries',
+            'Poor product quality',
+            'Contract violation',
+            'Expired Certification',
+            'Non-compliance with safety standards',
+            'Substandard crop yields'
+        ];
+        $risks = ['Critical', 'High', 'Medium', 'Low'];
+
+        for ($i = $initialCount + 1; $i <= 125; $i++) {
+            $pFix = $companyPrefixes[($i * 3) % count($companyPrefixes)];
+            $sFix = $companySuffixes[($i * 5) % count($companySuffixes)];
+            $name = "{$pFix} {$sFix} {$i}";
+            $code = 'AGR-' . str_pad((string) ($i + 200), 5, '0', STR_PAD_LEFT);
+            $slug = Str::slug($name);
+
+            if ($i > 115) {
+                $status = 'Blacklisted';
+                $reason = $reasons[$i % count($reasons)];
+                $risk = $risks[$i % count($risks)];
+            } elseif ($i > 105) {
+                $status = 'Pending Verification';
+                $reason = null;
+                $risk = 'Low';
+            } else {
+                $status = 'Active';
+                $reason = null;
+                $risk = 'Low';
+            }
+
+            $suppliers[] = [
+                'slug' => $slug,
+                'name' => $name,
+                'supplier_code' => $code,
+                'since' => now()->subDays($i * 3)->format('Y-m-d'),
+                'description' => $name . ' is an authorized supplier of agricultural produce and goods.',
+                'business_type' => $businessTypes[$i % count($businessTypes)],
+                'address' => ($i * 12) . ' Agri Way, ' . $locations[$i % count($locations)] . ', Philippines',
+                'phone' => '0917' . str_pad((string)$i, 7, '0', STR_PAD_LEFT),
+                'email' => 'contact@' . Str::slug($name) . '.com',
+                'location' => $locations[$i % count($locations)],
+                'rating' => round(3.5 + (($i % 15) / 10), 1),
+                'status' => $status,
+                'blacklist_reason' => $reason,
+                'blacklisted_since' => $status === 'Blacklisted' ? now()->subDays($i)->format('Y-m-d') : null,
+                'risk_level' => $risk,
+                'last_transaction' => now()->subDays($i)->format('Y-m-d'),
+                'contact_name' => 'Representative ' . $i,
+                'contact_role' => 'Account Manager',
+                'total_orders' => ($i % 20) + 1,
+                'total_spent' => ($i * 1500) + 5000.00,
+                'avg_order_value' => (($i * 1500) + 5000.00) / max(($i % 20) + 1, 1),
+                'on_time_rate' => 85 + ($i % 15),
+                'contract_start' => '2025-01-01',
+                'contract_end' => '2026-12-31',
+                'contract_duration' => '1 Year',
+                'payment_terms' => 'Net 30',
+                'auto_renewal' => true,
+                'contract_document' => $slug . '_Agreement.pdf',
+                'contract_document_size' => '1.2 MB',
+                'contract_scope' => ['Supply of agricultural products'],
+                'avg_rating_delta' => 'No change',
+                'on_time_delta' => 'No change',
+                'quality_score' => 4.5,
+                'quality_delta' => 'No change',
+                'total_orders_delta' => 'No change',
+                'products' => [
+                    ['name' => 'Rice', 'unit' => 'Sack', 'price' => 2450.00, 'moq' => '10 Sacks', 'lead_time' => 3],
+                ],
+                'purchase_history' => [],
+                'contract_history' => [],
+            ];
+        }
+
         foreach ($suppliers as $sData) {
             $products = $sData['products'] ?? [];
             $purchaseHistory = $sData['purchase_history'] ?? [];

@@ -59,7 +59,7 @@
 
         /* Unified Top Header Bar based on Goods Receipt & Invoice Matching style */
         .top-bar-unified {
-            background-color: var(--primary, #1e7d43);
+            background-color: #1e7d43;
             color: #ffffff;
             padding: 14px 24px;
             display: flex;
@@ -719,13 +719,72 @@
                 </div>
             </div>
 
-            <!-- Collapsed State Content (Icon-only) -->
+            <!-- Requirement 7: Collapsed State Content with Custom Floating Animated Tooltips -->
             <div class="collapsed-only flex-col items-center gap-4 mt-2 w-full">
-                <a href="{{ route('suppliers.dashboard') }}" class="w-12 h-12 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('suppliers.dashboard') ? 'bg-[#235c2b] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200/50' }}" title="Dashboard"><span class="text-base">📊</span></a>
-                <a href="{{ route('suppliers.index') }}" class="w-12 h-12 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('suppliers.index') ? 'bg-[#235c2b] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200/50' }}" title="View All Suppliers"><span class="text-base">🤝</span></a>
-                <a href="{{ route('suppliers.active') }}" class="w-12 h-12 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('suppliers.active') ? 'bg-[#235c2b] text-white shadow-sm' : 'text-slate-655 hover:bg-slate-200/50' }}" title="Active Suppliers"><span class="text-base">✅</span></a>
-                <a href="{{ route('suppliers.pending') }}" class="w-12 h-12 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('suppliers.pending') ? 'bg-[#235c2b] text-white shadow-sm' : 'text-slate-655 hover:bg-slate-200/50' }}" title="Pending Verification"><span class="text-base">⏳</span></a>
-                <a href="{{ route('suppliers.blacklisted') }}" class="w-12 h-12 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('suppliers.blacklisted') ? 'bg-[#235c2b] text-white shadow-sm' : 'text-slate-655 hover:bg-slate-200/50' }}" title="Blacklisted Suppliers"><span class="text-base">🚫</span></a>
+                <!-- Dashboard Tooltip -->
+                <div class="relative group/tooltip">
+                    <a href="{{ route('suppliers.dashboard') }}" 
+                       class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 {{ request()->routeIs('suppliers.dashboard') ? 'bg-[#235c2b] text-white shadow-md' : 'text-slate-700 bg-white/50 hover:bg-[#e9f5ee] hover:text-[#1f5c3d] shadow-sm' }}">
+                        <span class="text-lg select-none">📊</span>
+                    </a>
+                    <div class="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white shadow-lg opacity-0 translate-x-2 transition-all duration-200 ease-in-out group-hover/tooltip:opacity-100 group-hover/tooltip:translate-x-0 flex items-center gap-2">
+                        <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                        <span>📊</span>
+                        <span>Dashboard</span>
+                    </div>
+                </div>
+
+                <!-- Supplier List Tooltip -->
+                <div class="relative group/tooltip">
+                    <a href="{{ route('suppliers.index') }}" 
+                       class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 {{ request()->routeIs('suppliers.index') ? 'bg-[#235c2b] text-white shadow-md' : 'text-slate-700 bg-white/50 hover:bg-[#e9f5ee] hover:text-[#1f5c3d] shadow-sm' }}">
+                        <span class="text-lg select-none">🤝</span>
+                    </a>
+                    <div class="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white shadow-lg opacity-0 translate-x-2 transition-all duration-200 ease-in-out group-hover/tooltip:opacity-100 group-hover/tooltip:translate-x-0 flex items-center gap-2">
+                        <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                        <span>🤝</span>
+                        <span>Supplier List</span>
+                    </div>
+                </div>
+
+                <!-- Active Suppliers Tooltip -->
+                <div class="relative group/tooltip">
+                    <a href="{{ route('suppliers.active') }}" 
+                       class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 {{ request()->routeIs('suppliers.active') ? 'bg-[#235c2b] text-white shadow-md' : 'text-slate-700 bg-white/50 hover:bg-[#e9f5ee] hover:text-[#1f5c3d] shadow-sm' }}">
+                        <span class="text-lg select-none">✅</span>
+                    </a>
+                    <div class="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white shadow-lg opacity-0 translate-x-2 transition-all duration-200 ease-in-out group-hover/tooltip:opacity-100 group-hover/tooltip:translate-x-0 flex items-center gap-2">
+                        <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                        <span>✅</span>
+                        <span>Active Suppliers</span>
+                    </div>
+                </div>
+
+                <!-- Pending Verification Tooltip -->
+                <div class="relative group/tooltip">
+                    <a href="{{ route('suppliers.pending') }}" 
+                       class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 {{ request()->routeIs('suppliers.pending') ? 'bg-[#235c2b] text-white shadow-md' : 'text-slate-700 bg-white/50 hover:bg-[#e9f5ee] hover:text-[#1f5c3d] shadow-sm' }}">
+                        <span class="text-lg select-none">⏳</span>
+                    </a>
+                    <div class="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white shadow-lg opacity-0 translate-x-2 transition-all duration-200 ease-in-out group-hover/tooltip:opacity-100 group-hover/tooltip:translate-x-0 flex items-center gap-2">
+                        <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                        <span>⏳</span>
+                        <span>Pending Verification</span>
+                    </div>
+                </div>
+
+                <!-- Blacklisted Suppliers Tooltip -->
+                <div class="relative group/tooltip">
+                    <a href="{{ route('suppliers.blacklisted') }}" 
+                       class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 {{ request()->routeIs('suppliers.blacklisted') ? 'bg-[#235c2b] text-white shadow-md' : 'text-slate-700 bg-white/50 hover:bg-[#e9f5ee] hover:text-[#1f5c3d] shadow-sm' }}">
+                        <span class="text-lg select-none">🚫</span>
+                    </a>
+                    <div class="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white shadow-lg opacity-0 translate-x-2 transition-all duration-200 ease-in-out group-hover/tooltip:opacity-100 group-hover/tooltip:translate-x-0 flex items-center gap-2">
+                        <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                        <span>🚫</span>
+                        <span>Blacklisted Suppliers</span>
+                    </div>
+                </div>
             </div>
         </div>
         @endif

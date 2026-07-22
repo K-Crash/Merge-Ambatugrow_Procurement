@@ -63,6 +63,82 @@ class PurchaseOrderTest extends TestCase
         ]);
     }
 
+    public function test_purchase_order_code_generation_handles_deletion_correctly()
+    {
+        // 1. Create first PO
+        $this->actingAs($this->user)->post(route('purchase_orders.store'), [
+            'supplier_id' => $this->supplier->id,
+            'items' => [
+                ['name' => 'Item 1', 'quantity' => 1, 'unit_price' => 10]
+            ]
+        ]);
+
+        $first = PurchaseOrder::first();
+        $firstPoNumber = $first->po_number;
+
+        // 2. Create second PO
+        $this->actingAs($this->user)->post(route('purchase_orders.store'), [
+            'supplier_id' => $this->supplier->id,
+            'items' => [
+                ['name' => 'Item 2', 'quantity' => 1, 'unit_price' => 20]
+            ]
+        ]);
+
+        $second = PurchaseOrder::orderBy('id', 'desc')->first();
+        $secondPoNumber = $second->po_number;
+
+        // Verify the code sequence increments
+        $firstNum = (int) substr($firstPoNumber, -3);
+        $secondNum = (int) substr($secondPoNumber, -3);
+        $this->assertEquals($firstNum + 1, $secondNum);
+
+        // 3. Delete the second PO
+        $second->delete();
+
+        // 4. Create third PO - it should reuse the suffix or be higher, without duplicate violation
+        $response = $this->actingAs($this->user)->post(route('purchase_orders.store'), [
+            'supplier_id' => $this->supplier->id,
+            'items' => [
+                ['name' => 'Item 3', 'quantity' => 1, 'unit_price' => 30]
+            ]
+        ]);
+
+        $response->assertRedirect(route('procurement.home'));
+        $third = PurchaseOrder::orderBy('id', 'desc')->first();
+        $this->assertEquals($secondPoNumber, $third->po_number);
+    }
+
+    public function test_purchase_order_code_generation_handles_different_lengths_correctly()
+    {
+        // 1. Manually insert PO with code PO-YYYY-999 (length 11)
+        $year = date('Y');
+        PurchaseOrder::create([
+            'id' => 20,
+            'po_number' => "PO-{$year}-999",
+            'supplier_id' => $this->supplier->id,
+            'status' => 'draft',
+        ]);
+
+        // 2. Manually insert PO with code PO-YYYY-1000 (length 12)
+        PurchaseOrder::create([
+            'id' => 25,
+            'po_number' => "PO-{$year}-1000",
+            'supplier_id' => $this->supplier->id,
+            'status' => 'draft',
+        ]);
+
+        // 3. Create a new PO - it should generate PO-YYYY-1001
+        $this->actingAs($this->user)->post(route('purchase_orders.store'), [
+            'supplier_id' => $this->supplier->id,
+            'items' => [
+                ['name' => 'Item X', 'quantity' => 1, 'unit_price' => 10]
+            ]
+        ]);
+
+        $latest = PurchaseOrder::orderBy('id', 'desc')->first();
+        $this->assertEquals("PO-{$year}-1001", $latest->po_number);
+    }
+
     public function test_can_send_purchase_order()
     {
         // Arrange

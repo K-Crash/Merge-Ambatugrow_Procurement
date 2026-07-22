@@ -172,8 +172,17 @@ class RequisitionController extends Controller
     private function generateCode(): string
     {
         $year = now()->format('Y');
-        $count = Requisition::whereYear('created_at', $year)->count() + 1;
+        $latest = Requisition::where('code', 'like', "PR-{$year}-%")
+            ->orderBy('code', 'desc')
+            ->first();
 
-        return sprintf('PR-%s-%05d', $year, $count);
+        $nextNumber = 1;
+        if ($latest) {
+            $parts = explode('-', $latest->code);
+            $lastNumber = (int) end($parts);
+            $nextNumber = $lastNumber + 1;
+        }
+
+        return sprintf('PR-%s-%05d', $year, $nextNumber);
     }
 }

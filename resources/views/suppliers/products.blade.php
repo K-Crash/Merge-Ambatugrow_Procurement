@@ -5,19 +5,38 @@
 
 @section('content')
 
-    {{-- Supplier Header --}}
-    <div class="flex items-start gap-5 mb-7 font-sans">
-        <div class="w-20 h-20 rounded-full bg-green-900 border-2 border-white flex items-center justify-center text-white text-2xl font-black shrink-0 shadow-md">
-            {{ strtoupper(substr($supplier['supplier_name'] ?? $supplier['name'], 0, 1)) }}
-        </div>
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $supplier['supplier_name'] ?? $supplier['name'] }}</h1>
-            <div class="text-xs text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
-                <span>Supplier ID: <span class="font-semibold">{{ $supplier['supplier_id'] }}</span></span>
-                <span class="text-slate-300">•</span>
-                <span>Supplier since {{ $supplier['since'] }}</span>
+@php
+    $isBlocked = in_array(strtolower($supplier['status'] ?? ''), ['blacklisted', 'blocked'], true);
+@endphp
+
+    {{-- Supplier Header Bar --}}
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mb-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 font-sans">
+        <div class="flex items-center gap-5">
+            <div class="w-20 h-20 rounded-2xl bg-[#1f5c3d] border-2 border-emerald-400/30 flex items-center justify-center text-white text-3xl font-black shrink-0 shadow-md">
+                {{ strtoupper(substr($supplier['supplier_name'] ?? $supplier['name'], 0, 1)) }}
             </div>
-            <p class="text-xs text-gray-600 dark:text-slate-300 mt-2.5 max-w-xl leading-relaxed">{{ $supplier['description'] }}</p>
+            <div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $supplier['supplier_name'] ?? $supplier['name'] }}</h1>
+                    @if ($isBlocked)
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+                            <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                            Blocked / Blacklisted
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                            <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                            Active Supplier
+                        </span>
+                    @endif
+                </div>
+                <div class="text-xs text-slate-600 dark:text-slate-400 mt-1.5 flex items-center gap-2 font-medium">
+                    <span>Supplier ID: <strong class="text-slate-800 dark:text-slate-200 font-bold">{{ $supplier['supplier_id'] }}</strong></span>
+                    <span class="text-slate-300 dark:text-slate-700">•</span>
+                    <span>Supplier Since: <strong class="text-slate-800 dark:text-slate-200 font-bold">{{ $supplier['since'] }}</strong></span>
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-300 mt-2 max-w-xl leading-relaxed">{{ $supplier['description'] }}</p>
+            </div>
         </div>
     </div>
 
@@ -31,46 +50,60 @@
     </div>
 
     <div class="w-full">
-            <h1 style="font-size:22px; font-weight:700; color:#111827; margin-bottom:20px;">Product Details</h1>
+        <h1 class="text-xl font-bold text-slate-900 dark:text-white mb-5">Product Details</h1>
 
-            <div class="flex flex-col gap-5">
-                @foreach ($supplier['products'] as $p)
-                <div class="card">
-                    <h2 class="text-[16px] font-bold text-gray-900 mb-4">{{ $p['name'] }}</h2>
-                    <div class="flex gap-6">
-                        {{-- Image Placeholder --}}
-                        <div class="w-52 h-44 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center shrink-0">
-                            <span class="text-gray-400 font-semibold text-sm">IMG</span>
-                        </div>
-
-                        {{-- Product Details Table --}}
-                        <table class="flex-1" style="border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="text-align:left; padding:8px 16px 8px 0; font-size:13px; font-weight:600; color:#111827; border-bottom:1px solid #E5E7EB; width:50%">Field</th>
-                                    <th style="text-align:left; padding:8px 16px 8px 0; font-size:13px; font-weight:600; color:#111827; border-bottom:1px solid #E5E7EB;">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach([
-                                    ['Product Code', $p['code'] ?? '—'],
-                                    ['Category',     $p['category'] ?? '—'],
-                                    ['Unit',         $p['unit'] ?? '—'],
-                                    ['Unit Price',   $p['unit_price'] ?? '—'],
-                                    ['Stock Status', $p['stock_status'] ?? 'In Stock'],
-                                    ['Minimum Order Quantity', $p['min_order'] ?? '—'],
-                                    ['Lead time',    $p['lead_time'] ?? '—'],
-                                ] as [$field, $detail])
-                                <tr>
-                                    <td style="padding:9px 16px 9px 0; font-size:13px; color:#6B7280; border-bottom:1px solid #F3F4F6;">{{ $field }}</td>
-                                    <td style="padding:9px 16px 9px 0; font-size:13px; color:#111827; border-bottom:1px solid #F3F4F6;">{{ $detail }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                @endforeach
+        @if ($isBlocked)
+            <div class="mb-5 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-semibold flex items-center gap-2">
+                <i data-lucide="info" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                <span>Unit price and Minimum Order Quantity (MOQ) are hidden for blocked suppliers.</span>
             </div>
+        @endif
+
+        <div class="flex flex-col gap-5">
+            @foreach ($supplier['products'] as $p)
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-base font-bold text-slate-900 dark:text-white mb-4">{{ $p['name'] }}</h2>
+                <div class="flex flex-col md:flex-row gap-6">
+                    {{-- Image Placeholder --}}
+                    <div class="w-full md:w-52 h-44 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex flex-col items-center justify-center shrink-0 text-slate-400">
+                        <i data-lucide="package" class="w-8 h-8 mb-1"></i>
+                        <span class="font-semibold text-xs">Product Image</span>
+                    </div>
+
+                    {{-- Product Details Table (Requirement 4: Hide Unit Price & MOQ for Blocked Suppliers) --}}
+                    <table class="flex-1 border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="text-left py-2 pr-4 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 w-1/2">Field</th>
+                                <th class="text-left py-2 pr-4 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach([
+                                ['Product Code', $p['code'] ?? '—'],
+                                ['Category',     $p['category'] ?? '—'],
+                                ['Unit',         $p['unit'] ?? '—'],
+                                ['Unit Price',   $isBlocked ? '—' : ($p['unit_price'] ?? $p['price'] ?? '—')],
+                                ['Stock Status', $p['stock_status'] ?? 'In Stock'],
+                                ['Minimum Order Quantity (MOQ)', $isBlocked ? '—' : ($p['min_order'] ?? $p['moq'] ?? '—')],
+                                ['Lead time',    $p['lead_time'] ?? '—'],
+                            ] as [$field, $detail])
+                            <tr>
+                                <td class="py-2.5 pr-4 text-xs font-semibold text-slate-600 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800/60">{{ $field }}</td>
+                                <td class="py-2.5 pr-4 text-xs font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800/60">
+                                    @if ($isBlocked && in_array($field, ['Unit Price', 'Minimum Order Quantity (MOQ)'], true))
+                                        <span class="text-slate-400 italic font-normal">— (Hidden for blocked supplier)</span>
+                                    @else
+                                        {{ $detail }}
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endforeach
         </div>
+    </div>
 @endsection
